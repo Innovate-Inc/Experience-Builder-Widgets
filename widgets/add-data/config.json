@@ -1,3 +1,47 @@
 {
-    "sidebarId": null
+    "scopeOptions": [
+        {
+            "label": "My Content",
+            "value": "My Content"
+        },
+        {
+            "label": "My Favorites",
+            "value": "My Favorites"
+        },
+        {
+            "label": "My Groups",
+            "value": "My Groups"
+        },
+        {
+            "label": "My Organization",
+            "value": "My Organization"
+        },
+        {
+            "label": "Living Atlas",
+            "value": "Living Atlas"
+        },
+        {
+            "label": "ArcGIS Online",
+            "value": "ArcGIS Online"
+        }
+    ],
+    "sortOptions": {
+        "title": "Title",
+        "created": "Created",
+        "modified": "Modified",
+        "owner": "Owner",
+        "avg-rating": "Avg rating",
+        "num-ratings": "Ratings",
+        "num-views": "Views"
+    },
+    "defaultOrders": {
+        "title": "asc",
+        "created": "desc",
+        "modified": "desc",
+        "owner": "asc",
+        "avg-rating": "desc",
+        "num-ratings": "desc",
+        "num-views": "desc"
+    },
+    "selectedScopes": []
 }

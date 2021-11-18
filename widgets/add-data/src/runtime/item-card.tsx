@@ -17,7 +17,6 @@ interface Props {
     item: any
     jimuMapView: any
     portalUrl: any
-    gridView: any
     favorite: any
 }
 
@@ -28,7 +27,6 @@ export default class ItemCard extends React.PureComponent<Props, any> {
         this.state = {
             itemOnMap: false,
             prevItem: this.props.item,
-            prevView: this.props.gridView,
             itemLayers: null,
             itemTables: null,
             modal: false,
@@ -54,12 +52,6 @@ export default class ItemCard extends React.PureComponent<Props, any> {
             }
         }
 
-        const gridView = props.gridView;
-        if (gridView != state.prevView) {
-            return {
-                prevView: gridView
-            }
-        }
         return null;
     }
 
@@ -197,39 +189,19 @@ export default class ItemCard extends React.PureComponent<Props, any> {
                     this.setState({ itemTables: [] })
                 }
             })
-            .catch(error => console.log(error));
+            .catch(error => { });
     };
 
     render() {
-        // let faviconColor = '#4c4c4c'
-        // if (this.props.favorite) {
-        //     faviconColor = '#fad717'
-        // }
-        // const textSymbol = new TextSymbol({
-        //     color: faviconColor,
-        //     text: 'esri-icon-favorites',
-        //     font: {
-        //       size: 16,
-        //       family: 'CalciteWebCoreIcons'
-        //     }
-        //   });
-        // console.log(this.props.favorite)
-        // If the values for the state properties itemLayers or itemTables are null,
-        // that means the item property of the component has changed and the layers and tables
-        // need to be queried.
+
+        const item = this.props.item;
 
         if (!this.state.itemLayers || !this.state.itemTables) {
-            this.queryItemLayers();
+            if (item.portal && item.portal.user) {
+                this.queryItemLayers();
+            }
         };
-        const item = this.props.item;
-        // console.log(item)
 
-        // console.log(item.url)
-        // const favGroupId = item.portal.user.favGroupId;
-        // console.log(item.portal.user)
-        // const shareUrl = item.portal.restUrl
-        // // /content/users/[username]/shareItems
-        // // console.log(item.portal)
         const dateFormat = { year: 'numeric', month: 'long', day: 'numeric' };
 
         const itemDropdown = [
@@ -285,21 +257,17 @@ export default class ItemCard extends React.PureComponent<Props, any> {
             })
         }
 
-        // console.log(this.state.gridView)
-
         // The render function will return a card component for each portal item available to add
         // Most components within the card below are wrapped in a conditional statement
         // If the applicable property exists for the item, the component will be added, else null
         return (
             <Card className="h-100">
-                {item.thumbnailUrl && this.props.gridView
+                {item.thumbnailUrl
                     ? <CardImg className="p-2" css="max-width: 100%;" top src={item.thumbnailUrl} alt={item.snippet} />
                     : null
                 }
                 {item.title
                     ? <CardHeader className="p-2" borderTop={true}>
-                        {/* <Row> */}
-                        {/* <Col className="col-11 p-0 m-0"> */}
                         <Tooltip title={item.title} placement='bottom'>
                             <div css='
                                 font-weight: 500;
@@ -311,104 +279,70 @@ export default class ItemCard extends React.PureComponent<Props, any> {
                                 {item.title}
                             </div>
                         </Tooltip>
-                        {/* </Col> */}
-                        {/* {!this.state.gridView ? <Col className="col-1 p-0 m-0 justify-content-end">
-                                    <Dropdown className="m-0">
-                                        <DropdownButton
-                                            className="esri-icon-handle-horizontal border-0 m-0"
-                                            arrow={false}
-                                        />
-                                        <DropdownMenu className="m-0">
-                                            {itemDropdown.map(option => (
-                                                <DropdownItem onClick={option.sel}>
-                                                    {option.label}
-                                                </DropdownItem>
-                                            ))}
-                                        </DropdownMenu>
-                                    </Dropdown>
-                                </Col> : null } */}
-                        {/* </Row> */}
                     </CardHeader>
                     : null
                 }
-                {this.props.gridView ?
-                    <CardBody className="p-2" css='font-size: 0.75rem;'>
-                        {item.snippet
-                            ? <Tooltip title={item.snippet} placement='bottom'>
-                                <div css='
+                <CardBody className="p-2" css='font-size: 0.75rem;'>
+                    {item.snippet
+                        ? <Tooltip title={item.snippet} placement='bottom'>
+                            <div css='
                                     display: -webkit-box;
                                     -webkit-line-clamp: 4;
                                     -webkit-box-orient: vertical;  
                                     overflow: hidden;
                                 '>
-                                    {item.snippet}
-                                </div>
-                            </Tooltip>
-                            : null
+                                {item.snippet}
+                            </div>
+                        </Tooltip>
+                        : null
+                    }
+                    <div className='my-2' css='color: #777777;'>
+                        {item.iconUrl
+                            ? <img
+                                src={item.iconUrl}
+                                className='mr-1'
+                                css='display: inline-block;'
+                                height='16px'
+                                width='16px'
+                            />
+                            : ''
                         }
-                        <div className='my-2' css='color: #777777;'>
-                            {item.iconUrl
-                                ? <img
-                                    src={item.iconUrl}
-                                    className='mr-1'
-                                    css='display: inline-block;'
-                                    height='16px'
-                                    width='16px'
-                                />
-                                : ''
-                            }
-                            {item.displayName
-                                ? item.displayName
-                                : ''
-                            }
-                        </div>
-                    </CardBody>
-                    : null
-                }
-                {this.props.gridView ?
-                    <CardBody className='p-1 d-flex align-items-end'>
-                        <Tooltip title={'View item details'} placement='bottom'>
-                            <Button
-                                size='sm'
-                                className='m-1 p-2 esri-icon-description'
-                                onClick={this.toggleModal}
+                        {item.displayName
+                            ? item.displayName
+                            : ''
+                        }
+                    </div>
+                </CardBody>
+                <CardBody className='p-1 d-flex align-items-end'>
+                    <Tooltip title={'View item details'} placement='bottom'>
+                        <Button
+                            size='sm'
+                            className='m-1 p-2 esri-icon-description'
+                            onClick={this.toggleModal}
+                        />
+                    </Tooltip>
+                    <Tooltip title={this.state.itemOnMap ? 'Remove from map' : 'Add to map'} placement='bottom'>
+                        <Button
+                            size='sm'
+                            className={`m-1 p-2 ${this.state.itemOnMap ? 'esri-icon-minus' : 'esri-icon-plus'}`}
+                            onClick={this.state.itemOnMap ? this.removeLayer : this.addLayer}
+                        />
+                    </Tooltip>
+                    <Tooltip title={this.state.favorite ? 'Remove from favorites' : 'Add to favorites'} placement='bottom'>
+                        <Button
+                            size='sm'
+                            className='m-1 p-2'
+                            onClick={() => this.favItem()}
+                        >
+                            <StarIcon
+                                color={this.state.favorite ? '#fad717' : 'transparent'}
+                                stroke={this.state.favorite ? '#fad717' : 'black'}
+                                width='16'
+                                height='16'
                             />
-                        </Tooltip>
-                        <Tooltip title={this.state.itemOnMap ? 'Remove from map' : 'Add to map'} placement='bottom'>
-                            <Button
-                                size='sm'
-                                className={`m-1 p-2 ${this.state.itemOnMap ? 'esri-icon-minus' : 'esri-icon-plus'}`}
-                                onClick={this.state.itemOnMap ? this.removeLayer : this.addLayer}
-                            />
-                        </Tooltip>
-                        <Tooltip title={this.state.favorite ? 'Remove from favorites' : 'Add to favorites'} placement='bottom'>
-                            <Button
-                                size='sm'
-                                // className='m-1 p-2 esri-icon-favorites'
-                                // className='m-1 p-2'
-                                className='m-1 p-2'
-                                // color='#fad717'
-                                // css='color: #fad717; font-weight: bold; fill: #fad717;'
-                                // css={this.state.favorite ? 'background-color: #d64004; color: white;' : null}
-                                // css={this.state.favorite ? 'background-color: #FFEA70;' : null}
-                                // css={this.state.favorite ? 'color: #d64004;' : null}
-                                onClick={() => this.favItem()}
-                            >
-                                {/* /> */}
-                                {/* <calcite-icon icon='star'></calcite-icon> */}
-
-                                <StarIcon
-                                    color={this.state.favorite ? '#fad717' : 'transparent'}
-                                    stroke={this.state.favorite ? '#fad717' : 'black'}
-                                    width='16'
-                                    height='16'
-                                />
-                            </Button>
-                        </Tooltip>
-                    </CardBody>
-                    : null
-                }
-                {/* <calcite-icon icon='star'></calcite-icon> */}
+                        </Button>
+                    </Tooltip>
+                </CardBody>
                 <Modal isOpen={this.state.modal} toggle={this.toggleModal} scrollable={true} css="width: 800px;">
 
                     {/* Item Title */}
