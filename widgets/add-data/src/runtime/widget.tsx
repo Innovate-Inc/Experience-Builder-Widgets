@@ -3,18 +3,16 @@
 // add top border to modal footer
 
 /** @jsx jsx */
-import { React, css, AllWidgetProps, jsx, appActions, getAppStore, SessionManager } from "jimu-core";
+import { React, css, AllWidgetProps, jsx, appActions, getAppStore, SessionManager } from 'jimu-core';
 import {
     Col, Row,
     Button, ButtonGroup, InputGroup, InputGroupAddon, Select, Option, TextInput,
     Dropdown, DropdownButton, DropdownMenu, DropdownItem,
     Navbar, Nav, NavItem, Tooltip
-} from "jimu-ui";
-import { JimuMapViewComponent, JimuMapView } from "jimu-arcgis";
-import * as Portal from "esri/portal/Portal";
-import * as OAuthInfo from "esri/identity/OAuthInfo";
-import * as esriId from "esri/identity/IdentityManager";
-import * as PortalQueryParams from "esri/portal/PortalQueryParams";
+} from 'jimu-ui';
+import { JimuMapViewComponent, JimuMapView } from 'jimu-arcgis';
+import * as Portal from 'esri/portal/Portal';
+import * as PortalQueryParams from 'esri/portal/PortalQueryParams';
 import ItemCard from './item-card';
 
 export default class Widget extends React.PureComponent<AllWidgetProps<any>, any> {
@@ -145,16 +143,18 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
                     portal: portal
                 });
                 if (portal.user) {
-                    portal.user.fetchGroups().then((results) => {
-                        this.setState({
-                            groups: results
+                    portal.user.fetchGroups().then((groups) => {
+                        portal.user.fetchFolders().then(folders => {
+                            if (folders.length > 0) {
+                                this.setState({
+                                    folders: folders,
+                                    groups: groups
+                                }, () => {
+                                    this.updateResults()
+                                });
+                            };
                         });
                     })
-                    portal.user.fetchFolders().then(results => {
-                        if (results.length > 0) {
-                            this.setState({ folders: results })
-                        };
-                    });
                 }
             })
         }).catch()
@@ -182,7 +182,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
                 {/* Includes title, scope selection, group dropdown, folder dropdown, and searchbar. */}
                 <Navbar borderBottom={true} className='w-100'>
                     <Nav className='w-100 justify-content-between'>
-                        <NavItem css="font-weight: 500; font-size: 1.15rem;">
+                        <NavItem css='font-weight: 500; font-size: 1.15rem;'>
                             Add Data
                         </NavItem>
                     </Nav>
@@ -257,7 +257,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
                         <NavItem>
                             <InputGroup>
                                 <TextInput
-                                    placeholder="Search"
+                                    placeholder='Search'
                                     style={{ width: 150 }}
                                     type='search'
                                     css='
@@ -287,14 +287,14 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
                         </NavItem>
                     </Nav>
                 </Navbar>
-                <Col className="p-2 border-bottom" css="overflow-y: auto; overflow-x: hidden;">
-                    {this.props.hasOwnProperty("useMapWidgetIds") && this.props.useMapWidgetIds && this.props.useMapWidgetIds[0] && (
+                <Col className='p-2 border-bottom' css='overflow-y: auto; overflow-x: hidden;'>
+                    {this.props.hasOwnProperty('useMapWidgetIds') && this.props.useMapWidgetIds && this.props.useMapWidgetIds[0] && (
                         <JimuMapViewComponent useMapWidgetId={this.props.useMapWidgetIds?.[0]} onActiveViewChange={this.activeViewChangeHandler} />
                     )}
-                    <Row className="m-0" css="overflow-x: hidden;">
+                    <Row className='m-0' css='overflow-x: hidden;'>
                         {this.state.results.map(result => (
-                            <Col className="col-sm-6 p-2">
-                                {this.props.hasOwnProperty("useMapWidgetIds") && this.props.useMapWidgetIds && this.props.useMapWidgetIds[0] && (
+                            <Col className='col-sm-6 p-2'>
+                                {this.props.hasOwnProperty('useMapWidgetIds') && this.props.useMapWidgetIds && this.props.useMapWidgetIds[0] && (
                                     <ItemCard
                                         item={result}
                                         jimuMapView={this.state.jimuMapView}
@@ -308,7 +308,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
                 </Col>
                 <Navbar className='justify-content-between'>
                     <Dropdown activeIcon={true} direction='up'>
-                        <ButtonGroup size="sm">
+                        <ButtonGroup size='sm'>
                             <Button
                                 className='p-2 esri-icon-beginning'
                                 onClick={() => this.setState({ page: 1 },

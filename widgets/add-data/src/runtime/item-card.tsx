@@ -1,15 +1,15 @@
 /** @jsx jsx */
-import { React, jsx } from "jimu-core";
+import { React, jsx } from 'jimu-core';
 import {
-    Row, Col, Image, Dropdown, DropdownButton, DropdownMenu, DropdownItem,
+    Row, Col, Image,
     Card, CardImg, CardBody, CardHeader, Button, Tooltip,
     Modal, ModalHeader, ModalBody, ModalFooter
-} from "jimu-ui";
-import * as PortalItem from "esri/portal/PortalItem";
-import * as Layer from "esri/layers/Layer";
-import * as KMLLayer from "esri/layers/KMLLayer";
-import * as WFSLayer from "esri/layers/WFSLayer";
-import * as OGCFeatureLayer from "esri/layers/OGCFeatureLayer";
+} from 'jimu-ui';
+import * as PortalItem from 'esri/portal/PortalItem';
+import * as Layer from 'esri/layers/Layer';
+import * as KMLLayer from 'esri/layers/KMLLayer';
+import * as WFSLayer from 'esri/layers/WFSLayer';
+import * as OGCFeatureLayer from 'esri/layers/OGCFeatureLayer';
 import parse from 'html-react-parser';
 import * as esriRequest from 'esri/request';
 import { StarIcon } from '@icons/material';
@@ -145,7 +145,7 @@ export default class ItemCard extends React.PureComponent<Props, any> {
         }
         this.setState({ favorite: !this.state.favorite })
         const shareUrl = `${restUrl}/content/items/${itemId}/${shareText}?groups=${favGroupId}`
-        let method = "post" as const
+        let method = 'post' as const
         const params = {
             method: method,
             everyone: false,
@@ -167,9 +167,9 @@ export default class ItemCard extends React.PureComponent<Props, any> {
         // the value for those states will be set to an empty array instead of null
         const item = this.props.item;
         const params = {
-            query: { f: "json" },
-            handleAs: "json",
-            callbackParamName: "callback",
+            query: { f: 'json' },
+            handleAs: 'json',
+            callbackParamName: 'callback',
         };
         if (item.portal.credential) {
             params['token'] = item.portal.credential.token
@@ -236,7 +236,7 @@ export default class ItemCard extends React.PureComponent<Props, any> {
         const clamped = this.state.clamped;
 
         if (clamped) {
-            descriptionCSS = "display: -webkit-box; -webkit-line-clamp: 10; -webkit-box-orient: vertical; overflow: hidden;"
+            descriptionCSS = 'display: -webkit-box; -webkit-line-clamp: 10; -webkit-box-orient: vertical; overflow: hidden;'
             clampIcon = 'esri-icon-down-arrow'
             clampText = 'See more'
         }
@@ -261,13 +261,13 @@ export default class ItemCard extends React.PureComponent<Props, any> {
         // Most components within the card below are wrapped in a conditional statement
         // If the applicable property exists for the item, the component will be added, else null
         return (
-            <Card className="h-100">
+            <Card className='h-100'>
                 {item.thumbnailUrl
-                    ? <CardImg className="p-2" css="max-width: 100%;" top src={item.thumbnailUrl} alt={item.snippet} />
+                    ? <CardImg className='p-2' css='max-width: 100%;' top src={item.thumbnailUrl} alt={item.snippet} />
                     : null
                 }
                 {item.title
-                    ? <CardHeader className="p-2" borderTop={true}>
+                    ? <CardHeader className='p-2' borderTop={true}>
                         <Tooltip title={item.title} placement='bottom'>
                             <div css='
                                 font-weight: 500;
@@ -282,7 +282,7 @@ export default class ItemCard extends React.PureComponent<Props, any> {
                     </CardHeader>
                     : null
                 }
-                <CardBody className="p-2" css='font-size: 0.75rem;'>
+                <CardBody className='p-2' css='font-size: 0.75rem;'>
                     {item.snippet
                         ? <Tooltip title={item.snippet} placement='bottom'>
                             <div css='
@@ -343,44 +343,44 @@ export default class ItemCard extends React.PureComponent<Props, any> {
                         </Button>
                     </Tooltip>
                 </CardBody>
-                <Modal isOpen={this.state.modal} toggle={this.toggleModal} scrollable={true} css="width: 800px;">
+                <Modal isOpen={this.state.modal} toggle={this.toggleModal} scrollable={true} css='width: 800px;'>
 
                     {/* Item Title */}
                     <ModalHeader toggle={this.toggleModal}>{item.title}</ModalHeader>
-                    <ModalBody css="height: 400px;" className="overflow-auto">
+                    <ModalBody css='height: 400px;' className='overflow-auto'>
                         <Row>
                             {item.thumbnailUrl
-                                ? <Col className="col-4">
+                                ? <Col className='col-4'>
                                     {/* Item Thumbnail */}
                                     <Image
-                                        css="max-width: 150px;"
+                                        css='max-width: 150px;'
                                         src={item.thumbnailUrl}
                                         alt={item.snippet}
                                     />
                                 </Col>
                                 : null
                             }
-                            <Col className="col-8">
+                            <Col className='col-8'>
 
                                 {/* Item Created Date */}
-                                <Row className="mb-2">
-                                    <Col css="font-weight: 500;" className="col-12">Item Created Date</Col>
-                                    <Col className="col-12">{item.created.toLocaleDateString("en-US", dateFormat)}</Col>
+                                <Row className='mb-2'>
+                                    <Col css='font-weight: 500;' className='col-12'>Item Created Date</Col>
+                                    <Col className='col-12'>{item.created.toLocaleDateString('en-US', dateFormat)}</Col>
                                 </Row>
 
                                 {/* Item Modified Date */}
-                                <Row className="mb-2">
-                                    <Col css="font-weight: 500;" className="col-12">Item Modified Date</Col>
-                                    <Col className="col-12">{item.modified.toLocaleDateString("en-US", dateFormat)}</Col>
+                                <Row className='mb-2'>
+                                    <Col css='font-weight: 500;' className='col-12'>Item Modified Date</Col>
+                                    <Col className='col-12'>{item.modified.toLocaleDateString('en-US', dateFormat)}</Col>
                                 </Row>
                             </Col>
                         </Row>
                         <Row>
-                            <Col className="mt-2 col-12">
+                            <Col className='mt-2 col-12'>
 
                                 {/* Item Description */}
                                 <div css={descriptionCSS} id={`${item.id}-description`}>
-                                    {item.description ? parse(description) : "No item description."}
+                                    {item.description ? parse(description) : 'No item description.'}
                                 </div>
                                 {this.state.clampEnabled ?
                                     <div onClick={() => this.setState({ clamped: !clamped })}>
@@ -390,12 +390,12 @@ export default class ItemCard extends React.PureComponent<Props, any> {
                                     : null
                                 }
                                 {/* item tags */}
-                                {item.tags && item.tags.length > 0 ? <div css="font-weight: 500;" className="mt-2">Item Tags</div> : null}
+                                {item.tags && item.tags.length > 0 ? <div css='font-weight: 500;' className='mt-2'>Item Tags</div> : null}
                                 {item.tags && item.tags.length > 0 ? item.tags.map((tag, i) => (
                                     <span>
                                         <a
                                             href={`${item.portal.url}/home/content.html?tags=${tag}#organization`}
-                                            target="_blank"
+                                            target='_blank'
                                             title={`More items with this tag: ${tag}`}
                                         >
                                             {tag}
@@ -406,7 +406,7 @@ export default class ItemCard extends React.PureComponent<Props, any> {
 
                                 {/* item layers */}
                                 {this.state.itemLayers && this.state.itemLayers.length > 0 ?
-                                    <div css="font-weight: 500;" className="mt-2">Item Layers</div>
+                                    <div css='font-weight: 500;' className='mt-2'>Item Layers</div>
                                     : null
                                 }
                                 {this.state.itemLayers && this.state.itemLayers.length > 0 ?
@@ -414,7 +414,7 @@ export default class ItemCard extends React.PureComponent<Props, any> {
                                         <span>
                                             <a
                                                 href={`${item.url}/${layer.id}`}
-                                                target="_blank"
+                                                target='_blank'
                                                 title={`Details about this layer: ${layer.name}`}
                                             >
                                                 {layer.name}
@@ -426,7 +426,7 @@ export default class ItemCard extends React.PureComponent<Props, any> {
 
                                 {/* item tables */}
                                 {this.state.itemTables && this.state.itemTables.length > 0 ?
-                                    <div css="font-weight: 500;" className="mt-2">Item Tables</div>
+                                    <div css='font-weight: 500;' className='mt-2'>Item Tables</div>
                                     : null
                                 }
                                 {this.state.itemTables && this.state.itemTables.length > 0 ?
@@ -434,7 +434,7 @@ export default class ItemCard extends React.PureComponent<Props, any> {
                                         <span>
                                             <a
                                                 href={`${item.url}/${table.id}`}
-                                                target="_blank"
+                                                target='_blank'
                                                 title={`Details about this table: ${table.name}`}
                                             >
                                                 {table.name}
@@ -447,7 +447,7 @@ export default class ItemCard extends React.PureComponent<Props, any> {
                             </Col>
                         </Row>
                     </ModalBody>
-                    <ModalFooter className="justify-content-between">
+                    <ModalFooter className='justify-content-between'>
 
                         {/* Full Item Details */}
                         <Button tag='a' href={`${item.portal.url}/home/item.html?id=${item.id}`} target='_blank'>
