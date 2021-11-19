@@ -19,7 +19,6 @@ This fully configurable tool offers connections to a variety of data sources and
 * Text search
 * Page length
 * Page navigation
-* Grid or list view
 * Sorting
 
 ### Item details displayed within the app
