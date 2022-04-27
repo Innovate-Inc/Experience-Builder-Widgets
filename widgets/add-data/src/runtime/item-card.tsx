@@ -447,7 +447,7 @@ export default class ItemCard extends React.PureComponent<Props, any> {
                             </Col>
                         </Row>
                     </ModalBody>
-                    <ModalFooter className='justify-content-between'>
+                    <ModalFooter className='justify-content-between' css='border-top: 1px solid rgb(213, 213, 213) !important;'>
 
                         {/* Full Item Details */}
                         <Button tag='a' href={`${item.portal.url}/home/item.html?id=${item.id}`} target='_blank'>

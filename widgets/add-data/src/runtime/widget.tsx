@@ -1,9 +1,5 @@
-// To do:
-// living atlas section
-// add top border to modal footer
-
 /** @jsx jsx */
-import { React, css, AllWidgetProps, jsx, appActions, getAppStore, SessionManager } from 'jimu-core';
+import { React, css, AllWidgetProps, jsx, appActions, getAppStore, SessionManager, State } from 'jimu-core';
 import {
     Col, Row,
     Button, ButtonGroup, InputGroup, InputGroupAddon, Select, Option, TextInput,
@@ -11,6 +7,8 @@ import {
     Navbar, Nav, NavItem, Tooltip
 } from 'jimu-ui';
 import { JimuMapViewComponent, JimuMapView } from 'jimu-arcgis';
+import * as OAuthInfo from "esri/identity/OAuthInfo";
+import * as esriId from "esri/identity/IdentityManager";
 import * as Portal from 'esri/portal/Portal';
 import * as PortalQueryParams from 'esri/portal/PortalQueryParams';
 import ItemCard from './item-card';
@@ -22,7 +20,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
         this.state = {
             jimuMapView: null,
             portal: null,
-            agol: null,
+            // agol: null,
             scope: 'My Organization',
             groups: null,
             selGroup: null,
@@ -82,16 +80,33 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
             q = q.concat(` AND ${this.state.search}`)
         }
 
-        if (this.state.scope === 'My Groups' && this.state.selGroup) {
-            q = q.concat(` AND group:${this.state.selGroup}`)
-        } else if (this.state.scope === 'My Content' && portal.user && portal.user.username) {
-            q = q.concat(` AND owner:${portal.user.username}`)
-        } else if (this.state.scope === 'My Favorites' && portal.user && portal.user.favGroupId) {
-            q = q.concat(` AND group:${portal.user.favGroupId}`)
-        }
-
-        if (this.state.scope === 'ArcGIS Online') {
-            portal = this.state.agol;
+        switch (this.state.scope) {
+            case 'My Content':
+                if (portal.user && portal.user.username) {
+                    q = q.concat(` AND owner:${portal.user.username}`);
+                };
+                break;
+            case 'My Favorites':
+                if (portal.user && portal.user.username) {
+                    q = q.concat(` AND group:${portal.user.favGroupId}`)
+                }
+                break;
+            case 'My Groups':
+                if (this.state.selGroup) {
+                    q = q.concat(` AND group:${this.state.selGroup}`);
+                } else {
+                    q = q.concat(` AND orgid: "${portal.id}"`);
+                };
+                break;
+            case 'My Organization':
+                q = q.concat(` AND orgid: "${portal.id}"`);
+                break;
+            case 'Living Atlas':
+                q = q.concat(" AND owner:esri ")
+                break;
+            case 'ArcGIS Online':
+                q = q.concat(` AND access:public`)
+                break;
         }
 
 
@@ -122,42 +137,53 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
     };
 
     componentDidMount() {
-        const portalUrl = this.props.portalUrl;
-        const session = SessionManager.getInstance();
-        session.signIn('/', true, portalUrl).then(response => {
+        let appState = getAppStore().getState();
+        console.log(appState)
+        let portalUrl = appState.portalUrl;
+        let appId = appState.clientId;
 
-            // access agol content
-            const agol = new Portal();
-            agol.url = 'https://www.arcgis.com/';
-            agol.load().then(() => {
-                this.setState({
-                    agol: agol
-                });
-            });
+        var authInfo = new OAuthInfo({
+            // Swap this ID out with a registered application's client ID
+            appId: appId,
+            popup: false, // Optionally, if set to true, we can choose to have the sign-in window display in a separate popup window
+            // preserveUrlHash: true, // If we wish to allow authentication from any route
+            portalUrl: portalUrl,
+            // expiration: 14 * 24 * 60, // If we wish to define the OauthInfo's expiration time
+            // authNamespace: "/", // If we wish to define the authNamespace
+        });
 
-            // access portal content
-            let portal = new Portal();
-            portal.url = portalUrl;
-            portal.load().then(() => {
-                this.setState({
-                    portal: portal
-                });
-                if (portal.user) {
-                    portal.user.fetchGroups().then((groups) => {
-                        portal.user.fetchFolders().then(folders => {
-                            if (folders.length > 0) {
-                                this.setState({
-                                    folders: folders,
-                                    groups: groups
-                                }, () => {
-                                    this.updateResults()
-                                });
-                            };
-                        });
-                    })
-                }
+        esriId.destroyCredentials();
+        esriId.registerOAuthInfos([authInfo]);
+        esriId
+            .checkSignInStatus(portalUrl + "/sharing")
+            .then(() => {
+                esriId.getCredential(portalUrl + "/sharing");
             })
-        }).catch()
+    // Set the value of the block-scoped local variable to construct our app, targeting the app 
+        
+        const portal = new Portal({});
+        portal.authMode = "immediate";
+        portal.load().then(() => {
+            this.setState({portal: portal});
+            console.log(portal)
+            // console.log(portal.user)
+            if (portal.user) {
+                portal.user.fetchGroups().then((groups) => {
+                    // console.log(groups)
+                    portal.user.fetchFolders().then(folders => {
+                        // console.log(folders)
+                        if (folders.length > 0) {
+                            this.setState({
+                                folders: folders,
+                                groups: groups
+                            }, () => {
+                                this.updateResults()
+                            });
+                        };
+                    });
+                });
+            };
+        });
     };
 
     render() {
