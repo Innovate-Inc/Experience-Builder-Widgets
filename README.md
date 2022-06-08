@@ -11,13 +11,20 @@ These widgets are available for deployment in next generation geospatial web app
 ## Deployment
 
 1. Download Version 1.5 of [ArcGIS Experience Builder for Developers](https://developers.arcgis.com/downloads/#arcgis-experience-builder)
-1. Extract the zip file into your desired location
-1. Within the client folder, install all requirements
+2. Extract the zip file into your desired location
+3. Within the client folder, install all requirements
 ```sh
 cd client
 npm install
 ```
-4. Clone the repo into the `client/innovate-widgets` folder
+4. Install custom widget dependencies into client directory (client/package.json or npm i):
+     ```
+   "react-virtual": "^2.10.4" (sharepoint-documents)
+   "@azure/msal-browser": "^2.25.0" (sharepoint-documents)
+   "html-react-parser": "^1.4.14" (add-data)
+   
+   ```
+5. Clone the repo into the `client/innovate-widgets` folder
 ```sh
 git clone git@github.com:Innovate-Inc/Experience-Builder-Widgets.git innovate-widgets
 ```
