@@ -22,8 +22,9 @@ npm install
    "react-virtual": "^2.10.4" (sharepoint-documents)
    "@azure/msal-browser": "^2.25.0" (sharepoint-documents)
    "html-react-parser": "^1.4.14" (add-data)
-   
-   ```
+   "@microsoft/microsoft-graph-client": "^3.0.2" (sharepoint-documents)
+   "react-query": "^3.39.0" (sharepoint-documents)
+```
 5. Clone the repo into the `client/innovate-widgets` folder
 ```sh
 git clone git@github.com:Innovate-Inc/Experience-Builder-Widgets.git innovate-widgets
