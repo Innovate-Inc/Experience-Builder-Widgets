@@ -4,7 +4,7 @@ import {useInfiniteQuery} from 'react-query';
 import {useVirtual} from 'react-virtual';
 import {ListItem} from './listItem';
 import {useState} from 'react';
-import {Loading} from 'jimu-ui';
+import {Loading, Tooltip} from 'jimu-ui';
 
 async function queryRelationshipList(graphClient, relationshipListUrl, globalid) {
   return graphClient.api(`${relationshipListUrl}/items?$filter=fields/RecordFK+eq+'${globalid}'`)
@@ -71,13 +71,27 @@ function calcItemHeight(documents) {
   return `${40 + (documents?.length > 0 ? documents?.length * 20 : 20)}px`;
 }
 
+// function wrapFileName(filename) {
+//   if (filename.length > 20 ) {
+//     return [filename.map(i => <a href={i.webUrl} target="_blank">
+//       <ListItem title={i.fields.LinkFilename}/></a>)]
+//   } else if (filename.length > 0 && filename.length < 20){
+//     return [filename.map(i => <a href={i.webUrl} target="_blank"><ListItem title={i.fields.LinkFilename}/></a>)]
+//   } else {
+//     return "No documents found for this site."
+//   }
+// }
+
 function Item(props) {
   return <div style={{height: calcItemHeight(props.documents)}}>
     <h5 style={{marginBottom: 0}}>{props.item.LABEL}</h5>
     {props.documents.length > 0
-      ? [...props.documents.map(i => <a href={i.webUrl} target="_blank">
-        <ListItem title={i.fields.LinkFilename}/>
-      </a>)]
+        ? [...props.documents.map(i =>
+            <Tooltip onClose={function noRefCheck(){}} onOpen={function noRefCheck(){}} title={i.fields.LinkFilename}>
+              <a href={i.webUrl} target="_blank">
+                <ListItem title={i.fields.LinkFilename}/>
+              </a>
+            </Tooltip>)]
       : 'No documents found for this site.'}
     <hr></hr>
   </div>
@@ -196,13 +210,13 @@ export default function VirtualScroll(props: AllWidgetProps) {
               position: "absolute",
               top: 0,
               left: 0,
-              width: "100%",
+              width: 300,
               // height: calcItemHeight(item),
-              transform: `translateY(${virtualRow.start}px)`
+              transform: `translateY(${virtualRow.start}px)`,
             }}
           >
             {isLoaderRow ? hasNextPage ? <Loading type='SECONDARY'/> : 'Done' :
-              <Item item={item} documents={documents[item.UNIQUE_ID]}></Item>}
+                <Item id="tooltip" item={item} documents={documents[item.UNIQUE_ID]}></Item>}
           </div>
         )
       })}
