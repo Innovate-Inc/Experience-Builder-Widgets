@@ -4,11 +4,19 @@ import {useInfiniteQuery} from 'react-query';
 import {useVirtual} from 'react-virtual';
 import {ListItem} from './listItem';
 import {useState} from 'react';
-import {Loading, Tooltip} from 'jimu-ui';
+import {Loading, Button, Icon, Tooltip} from 'jimu-ui';
 
 async function queryRelationshipList(graphClient, relationshipListUrl, globalid) {
   return graphClient.api(`${relationshipListUrl}/items?$filter=fields/RecordFK+eq+'${globalid}'`)
     .get().then(r => r.value);
+}
+
+function deleteRelationship(graphClient, relationshipListUrl, doc, uniqueid) {
+  doc.fields.ReverseRecordFKs.forEach((d) => {
+    if (d.LookupValue === uniqueid) {
+      return graphClient.api(`${relationshipListUrl}/items/${d.LookupId}`).delete();
+    }
+  })
 }
 
 // async function batchQueryRelationshipList(graphClient, relationshipListUrl, globalids) {
@@ -68,33 +76,51 @@ async function queryList(graphClient, listUrl, relationshipListUrl, globalid) {
 // }
 
 function calcItemHeight(documents) {
-  return `${40 + (documents?.length > 0 ? documents?.length * 20 : 20)}px`;
+  return `${50 + (documents?.length > 0 ? documents?.length * 20 : 20)}px`;
 }
 
-// function wrapFileName(filename) {
-//   if (filename.length > 20 ) {
-//     return [filename.map(i => <a href={i.webUrl} target="_blank">
-//       <ListItem title={i.fields.LinkFilename}/></a>)]
-//   } else if (filename.length > 0 && filename.length < 20){
-//     return [filename.map(i => <a href={i.webUrl} target="_blank"><ListItem title={i.fields.LinkFilename}/></a>)]
-//   } else {
-//     return "No documents found for this site."
-//   }
-// }
 
 function Item(props) {
-  return <div style={{height: calcItemHeight(props.documents)}}>
+  const [documents, setDocuments] = useState(props.documents);
+
+  const flexboxStyle = {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginRight: "10px"
+  }
+
+  const remove = (doc) => () => {
+    deleteRelationship(props.graphClient, props.relationshipListUrl, doc, props.item.UNIQUE_ID);
+
+    setDocuments(documents.filter((e) => {
+      return e.fields.id !== doc.fields.id;
+    }));
+  }
+
+  return (<div style={{height: calcItemHeight(documents)}}>
     <h5 style={{marginBottom: 0}}>{props.item.LABEL}</h5>
-    {props.documents.length > 0
-        ? [...props.documents.map(i =>
-            <Tooltip onClose={function noRefCheck(){}} onOpen={function noRefCheck(){}} title={i.fields.LinkFilename}>
-              <a href={i.webUrl} target="_blank">
-                <ListItem title={i.fields.LinkFilename}/>
-              </a>
-            </Tooltip>)]
+    {documents.length > 0
+      ? [...documents.map(i =>
+            <div style={flexboxStyle}>
+              <div style={{maxWidth:"90%"}}>
+                <Tooltip onClose={function noRefCheck(){}} onOpen={function noRefCheck(){}} title={i.fields.LinkFilename}>
+                  <a href={i.webUrl} target="_blank">
+                    <ListItem title={i.fields.LinkFilename}/>
+                  </a>
+                </Tooltip>
+              </div>
+              <Button icon onClick={remove(i)} size="sm" style={{width:"20px", height:"20px", border:"transparent"}}>
+                <Icon
+                    icon="<svg xmlns='http://www.w3.org/2000/svg' fill='currentColor' className='bi bi-trash' viewBox='0 0 16 16'><path d='M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z'/><path fill-rule='evenodd' d='M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z'/></svg>"
+                    size="m"
+                />
+              </Button>
+            </div>)]
       : 'No documents found for this site.'}
     <hr></hr>
-  </div>
+  </div>)
 }
 
 export default function VirtualScroll(props: AllWidgetProps) {
@@ -142,6 +168,7 @@ export default function VirtualScroll(props: AllWidgetProps) {
     // estimateSize: React.useCallback(() => 50, []),
   });
 
+
   React.useEffect(() => {
     console.log('file added');
     if (props.addedItem) {
@@ -154,6 +181,7 @@ export default function VirtualScroll(props: AllWidgetProps) {
       setDocumentCount(c);
     }
   }, [props.addedItem])
+
 
   React.useEffect(() => {
     console.log('rebuilding virtual scroll')
@@ -200,24 +228,23 @@ export default function VirtualScroll(props: AllWidgetProps) {
         const item = pageData[virtualRow.index];
 
         return (
-          <div
-            key={virtualRow.index}
-            ref={el => virtualRow.measureRef(el)}
-            className={
-              virtualRow.index % 2 ? "ListItemOdd" : "ListItemEven"
-            }
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: 300,
-              // height: calcItemHeight(item),
-              transform: `translateY(${virtualRow.start}px)`,
-            }}
-          >
-            {isLoaderRow ? hasNextPage ? <Loading type='SECONDARY'/> : 'Done' :
-                <Item id="tooltip" item={item} documents={documents[item.UNIQUE_ID]}></Item>}
-          </div>
+              <div
+                  key={virtualRow.index}
+                  ref={el => virtualRow.measureRef(el)}
+                  className={virtualRow.index % 2 ? "ListItemOdd" : "ListItemEven"}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    // height: calcItemHeight(item),
+                    transform: `translateY(${virtualRow.start}px)`
+                  }}
+              >
+                {isLoaderRow ? hasNextPage ? <Loading type='SECONDARY'/> : 'Done' :
+                    <Item item={item} documents={documents[item.UNIQUE_ID]} graphClient={props.graphClient}
+                          relationshipListUrl={props.relationshipListUrl}></Item>}
+              </div>
         )
       })}
     </div>
