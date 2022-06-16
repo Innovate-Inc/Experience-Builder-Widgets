@@ -14,7 +14,7 @@ async function queryRelationshipList(graphClient, relationshipListUrl, globalid)
 function deleteRelationship(graphClient, relationshipListUrl, doc, uniqueid) {
   doc.fields.ReverseRecordFKs.forEach((d) => {
     if (d.LookupValue === uniqueid) {
-      return graphClient.api(`${relationshipListUrl}/items/${doc.fields.id}`).delete();
+      return graphClient.api(`${relationshipListUrl}/items/${d.LookupId}`).delete();
     }
   })
 }
