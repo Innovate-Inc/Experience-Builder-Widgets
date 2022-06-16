@@ -238,7 +238,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
   createRelationshipListItems(DocumentFKLookupId) {
     this.state.selectedObjects.forEach(i => {
       // const itemId = this.re.exec()[1];
-      const RecordFK = i.UNIQUE_ID
+      const RecordFK = i.UNIQUE_ID;
       return this.graphClient.api(`${this.props.relationshipListUrl}/items`).post(
         {
           fields: {
@@ -283,11 +283,11 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
 
         {this.state.selectedObjects.length > 0
           ? <VirtualScroll graphClient={this.graphClient} listUrl={this.props.listUrl}
-                           relationshipListUrl={this.props.relationshipListUrl}
-                           selectedObjects={this.state.selectedObjects}
-                           selectionId={this.state.selectionId}
-                           addedItem={this.state.newListItem}></VirtualScroll>
-          : null}
+                             relationshipListUrl={this.props.relationshipListUrl}
+                             selectedObjects={this.state.selectedObjects}
+                            selectionId={this.state.selectionId}
+                             addedItem={this.state.newListItem}></VirtualScroll>
+            : null}
         {this.state.selectedObjects.length > 0
           ? <div>
             <hr></hr>
