@@ -78,7 +78,9 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<C
   }
 
   getLayerName = (dsId) => {
-    return DataSourceManager.getInstance().getDataSource(dsId).getLabel()
+    return DataSourceManager.getInstance().getDataSource(dsId) !== undefined
+      ? DataSourceManager.getInstance().getDataSource(dsId).getLabel()
+      : ''
   }
 
   toggleExpression = (ds?) => () => {
