@@ -29,7 +29,7 @@ interface State {
 }
 
 export default class Setting extends React.PureComponent<AllWidgetSettingProps<Config>, State> {
-  supportedTypes = Immutable([DataSourceTypes.FeatureLayer, DataSourceTypes.MapService]);
+  supportedTypes = Immutable([DataSourceTypes.FeatureLayer]);
 
   state = {currentDS: null, expressionOpen: false};
   currentExpression = null
