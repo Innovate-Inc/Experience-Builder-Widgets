@@ -41,10 +41,10 @@ git clone git@github.com:Innovate-Inc/Experience-Builder-Widgets.git innovate-wi
 The Add Data Widget adds functionality for users to search for, add, and remove data sources to maps.
 
 #### Version
-1.0
+1.1
 
 #### Latest Release
-11/10/2021
+8/2/2022
 
 #### Experience Builder Version
-1.5
+1.9

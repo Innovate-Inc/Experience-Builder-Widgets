@@ -1,4 +1,6 @@
 /** @jsx jsx */
+/* eslint-disable */
+
 import { React, css, AllWidgetProps, jsx, appActions, getAppStore, SessionManager, State } from 'jimu-core';
 import {
     Col, Row,
@@ -7,10 +9,10 @@ import {
     Navbar, Nav, NavItem, Tooltip
 } from 'jimu-ui';
 import { JimuMapViewComponent, JimuMapView } from 'jimu-arcgis';
-import * as OAuthInfo from "esri/identity/OAuthInfo";
-import * as esriId from "esri/identity/IdentityManager";
-import * as Portal from 'esri/portal/Portal';
-import * as PortalQueryParams from 'esri/portal/PortalQueryParams';
+import OAuthInfo from "esri/identity/OAuthInfo";
+import esriId from "esri/identity/IdentityManager";
+import Portal from 'esri/portal/Portal';
+import PortalQueryParams from 'esri/portal/PortalQueryParams';
 import ItemCard from './item-card';
 
 export default class Widget extends React.PureComponent<AllWidgetProps<any>, any> {
@@ -137,23 +139,9 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
     };
 
     componentDidMount() {
+
         let appState = getAppStore().getState();
-        console.log(appState)
         let portalUrl = appState.portalUrl;
-        let appId = appState.clientId;
-
-        var authInfo = new OAuthInfo({
-            // Swap this ID out with a registered application's client ID
-            appId: appId,
-            popup: false, // Optionally, if set to true, we can choose to have the sign-in window display in a separate popup window
-            // preserveUrlHash: true, // If we wish to allow authentication from any route
-            portalUrl: portalUrl,
-            // expiration: 14 * 24 * 60, // If we wish to define the OauthInfo's expiration time
-            // authNamespace: "/", // If we wish to define the authNamespace
-        });
-
-        esriId.destroyCredentials();
-        esriId.registerOAuthInfos([authInfo]);
         esriId
             .checkSignInStatus(portalUrl + "/sharing")
             .then(() => {
@@ -165,13 +153,9 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
         portal.authMode = "immediate";
         portal.load().then(() => {
             this.setState({portal: portal});
-            console.log(portal)
-            // console.log(portal.user)
             if (portal.user) {
                 portal.user.fetchGroups().then((groups) => {
-                    // console.log(groups)
                     portal.user.fetchFolders().then(folders => {
-                        // console.log(folders)
                         if (folders.length > 0) {
                             this.setState({
                                 folders: folders,

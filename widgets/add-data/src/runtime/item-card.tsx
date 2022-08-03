@@ -1,17 +1,19 @@
 /** @jsx jsx */
+/* eslint-disable */
+
 import { React, jsx } from 'jimu-core';
 import {
     Row, Col, Image,
     Card, CardImg, CardBody, CardHeader, Button, Tooltip,
     Modal, ModalHeader, ModalBody, ModalFooter
 } from 'jimu-ui';
-import * as PortalItem from 'esri/portal/PortalItem';
-import * as Layer from 'esri/layers/Layer';
-import * as KMLLayer from 'esri/layers/KMLLayer';
-import * as WFSLayer from 'esri/layers/WFSLayer';
-import * as OGCFeatureLayer from 'esri/layers/OGCFeatureLayer';
+import PortalItem from 'esri/portal/PortalItem';
+import Layer from 'esri/layers/Layer';
+import KMLLayer from 'esri/layers/KMLLayer';
+import WFSLayer from 'esri/layers/WFSLayer';
+import OGCFeatureLayer from 'esri/layers/OGCFeatureLayer';
 import parse from 'html-react-parser';
-import * as esriRequest from 'esri/request';
+import esriRequest from 'esri/request';
 import { StarIcon } from '@icons/material';
 interface Props {
     item: any
@@ -193,7 +195,6 @@ export default class ItemCard extends React.PureComponent<Props, any> {
     };
 
     render() {
-
         const item = this.props.item;
 
         if (!this.state.itemLayers || !this.state.itemTables) {

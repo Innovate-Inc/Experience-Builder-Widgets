@@ -1,19 +1,25 @@
 {
   "name": "add-data",
+  "label": "Add Data",
   "type": "widget",
-  "version": "1.0",
+  "version": "1.1",
+  "exbVersion": "1.9.0",
   "dependency": "jimu-arcgis",
-  "exbVersion": "1.5.0",
   "author": "Innovate, Inc.!",
   "description": "Search for portal content and add layers to the map.",
   "copyright": "",
   "license": "",
-  "properties": {},
-  "translatedLocales": [
-    "en"
+  "publishMessages": [
+    "EXTENT_CHANGE",
+    "DATA_RECORDS_SELECTION_CHANGE"
   ],
+  "messageActions": [],
   "defaultSize": {
     "width": 300,
     "height": 500
-  }
+  },
+  "properties": {},
+  "translatedLocales": [
+    "en"
+  ]
 }

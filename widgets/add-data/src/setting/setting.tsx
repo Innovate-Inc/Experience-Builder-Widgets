@@ -1,8 +1,10 @@
 /** @jsx jsx */
+/* eslint-disable */
+
 import { React, jsx, getAppStore, IMState } from "jimu-core";
 import { AllWidgetSettingProps } from "jimu-for-builder";
 import { JimuMapViewSelector } from "jimu-ui/advanced/setting-components";
-import { MultiSelect } from "jimu-ui";
+import { MultiSelect, Input } from "jimu-ui";
 
 export default class Setting extends React.PureComponent<AllWidgetSettingProps<any>, any> {
 
