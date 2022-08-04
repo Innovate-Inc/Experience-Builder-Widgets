@@ -20,6 +20,7 @@ export interface Config {
   siteId: string
   listId: string
   listUrl: string
+  permissionsListId: string
   useDataSources: Immutable<UseDataSource[]>
 }
 
@@ -154,6 +155,8 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<C
                 onChange={e => this.updateConfigProperty('driveItemRootId', e.target.value)}/>
       <TextArea placeholder='Relationship List ID' value={this.props.relationshipListId}
                 onChange={e => this.updateConfigProperty('relationshipListId', e.target.value)}/>
+      <TextArea placeholder='Permissions List ID' value={this.props.permissionsListId}
+                onChange={e => this.updateConfigProperty('permissionsListId', e.target.value)}/>
     </div>
   }
 }

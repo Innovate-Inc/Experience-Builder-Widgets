@@ -8,7 +8,7 @@ Clone the [sample repo](https://github.com/esri/arcgis-experience-builder-sdk-re
 ## How it works
 This widget requires another widget to publish the message for the data records and string selection change. You can use the FeatureInfo widget with a Record Selection Changes trigger to select this widget to configure the action settings. 
 
-Within `query-action-setting.tsx`, create a class to extend the React.PureComponent class with the types `ActionSettingProps`. The configuration of the message action can be changed through the `onSettingChange` method.
+Within `gp-query-action-setting.tsx`, create a class to extend the React.PureComponent class with the types `ActionSettingProps`. The configuration of the message action can be changed through the `onSettingChange` method.
 
   ```javascript
 this.props.onSettingChange({
@@ -26,7 +26,7 @@ this.props.onSettingChange({
 
 Within `query-action.tsx`, create a class to extend the `AbstractMessageAction` class. Then set the URI of the action setting component through the `getSettingComponentUri` method. Use the `filterMessageType` method to filter out actions that are not relevant to this widget. The `onExecute` method is called when the action is triggered.
 ```javascript
-export default class QueryAction extends AbstractMessageAction{
+export default class GpQueryAction extends AbstractMessageAction{
   filterMessageType(messageType: MessageType, messageWidgetId?: string): boolean{
     return [MessageType.StringSelectionChange, MessageType.DataRecordsSelectionChange].indexOf(messageType) > -1;
   }

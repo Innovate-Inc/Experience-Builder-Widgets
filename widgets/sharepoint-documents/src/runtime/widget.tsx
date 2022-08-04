@@ -6,7 +6,7 @@ import {
   AllWidgetProps,
   DataSourceStatus,
   IMDataSourceInfo,
-  ExpressionResolverComponent
+  ExpressionResolverComponent,
 } from 'jimu-core'
 import Query from 'esri/tasks/support/Query'
 import {Client, FileUpload, LargeFileUploadTask} from '@microsoft/microsoft-graph-client'
@@ -29,7 +29,9 @@ interface State {
   count: number,
   selectedObjects: any[],
   graphClient: any,
-  selectionId: string
+  selectionId: string,
+  account: any,
+  permissions: {}
 }
 
 export default class Widget extends React.PureComponent<AllWidgetProps<unknown>, State> {
@@ -39,12 +41,15 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
     count: 0,
     selectedObjects: [],
     selectionId: null,
-    initialized: false
+    initialized: false,
+    account: null,
+    permissions: null
   }
   msalInstance;
   graphClient;
   loginRequest = {scopes: ['user.read', 'profile', 'Sites.Read.All', 'Sites.ReadWrite.All']};
   profile;
+  account;
 
   re = /{(.*)}/;
 
@@ -72,7 +77,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
     })
   }
   componentDidUpdate(prevProps: AllWidgetProps<unknown>) {
-    console.log('componentDidUpdate')
+    console.log('componentDidUpdate');
     if (this.props.stateProps?.selectionId !== undefined && this.props.stateProps.selectionId !== this.state.selectionId) {
       this.setState({
         selectedObjects: this.props.stateProps.selectedObjects.map(o => {
@@ -86,7 +91,6 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
         }),
         selectionId: this.props.stateProps.selectionId
       })
-
     }
   }
 
@@ -109,26 +113,53 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
     this.props.useDataSources.forEach(ds => {
       this.flatDataSources[ds.dataSourceId] = ds
       if (ds.expression) {
-        this.expression = ds.expression
+        this.expression = ds.expression;
       }
     })
     this.initMsal().then(() => {
       this.setState({initialized: true});
-    }
+    })
   }
 
+
+  async getUserPermissions(userName, permissionsListId) {
+    let writePerms = false;
+    let readPerms = false;
+    let urlArray = this.props.driveItemRootUrl.split('/');
+    let siteUrl = `/sites/${urlArray[2]}`;
+    await this.graphClient.api(`${siteUrl}/lists/${permissionsListId}/items?expand=fields`).get().then((results) => {
+      results.value.forEach((v) => {
+        if (v.fields.First === userName) {
+          if (v.fields.Title === 'Site Owner' || v.fields.Title === 'Site Member') {
+            readPerms = true;
+            writePerms = true;
+          } else if (v.fields.Title === 'Site Visitor') {
+            readPerms = true;
+            writePerms = false;
+          }
+        }
+      });
+    })
+    this.setState({permissions: {
+        read: readPerms,
+        write: writePerms
+      }
+    })
+  }
 
   async initMsal() {
     if (!this.state.initialized) {
       this.setMsalConfig()
     }
-    let account
+    let account;
     try {
       account = await this.msalLogin()
     } catch {
       account = await this.getMsalConcent()
     }
-    this.initGraphClient(account)
+    this.setState({account: account});
+    this.initGraphClient(account);
+    await this.getUserPermissions(this.state.account.name, this.props.permissionsListId);
   }
 
   // isDsConfigured = () => {
@@ -280,21 +311,34 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
           ? <h5>Click on item see related documents</h5>
           : <h5>Currently viewing documents for {this.state.selectedObjects.length} sites.</h5>}
 
+        {this.state.permissions.read === true
+          ? this.state.selectedObjects.length > 0
+            ? <VirtualScroll graphClient={this.graphClient} listUrl={this.props.listUrl}
+                               relationshipListUrl={this.props.relationshipListUrl}
+                               selectedObjects={this.state.selectedObjects}
+                              selectionId={this.state.selectionId}
+                               addedItem={this.state.newListItem}
+                                writeAccess={this.state.permissions.write}></VirtualScroll>
+              : null
+          : <p>You do not currently have access the sharepoint document library. Please contact your sharepoint administrator</p>}
 
-        {this.state.selectedObjects.length > 0
-          ? <VirtualScroll graphClient={this.graphClient} listUrl={this.props.listUrl}
-                             relationshipListUrl={this.props.relationshipListUrl}
-                             selectedObjects={this.state.selectedObjects}
-                            selectionId={this.state.selectionId}
-                             addedItem={this.state.newListItem}></VirtualScroll>
-            : null}
-        {this.state.selectedObjects.length > 0
-          ? <div>
-            <hr></hr>
-            Select a file to upload to the selected site(s).<br/>
-            <input style={{minHeight: '26px'}} type="file" onChange={this.fileInputChanged}/>
-          </div>
-          : null}
+        {/*{this.state.selectedObjects.length > 0*/}
+        {/*  ? <VirtualScroll graphClient={this.graphClient} listUrl={this.props.listUrl}*/}
+        {/*                     relationshipListUrl={this.props.relationshipListUrl}*/}
+        {/*                     selectedObjects={this.state.selectedObjects}*/}
+        {/*                    selectionId={this.state.selectionId}*/}
+        {/*                     addedItem={this.state.newListItem}></VirtualScroll>*/}
+        {/*    : null}*/}
+
+        {this.state.permissions.write === true
+          ? this.state.selectedObjects.length > 0
+            ? <div>
+              <hr></hr>
+              Select a file to upload to the selected site(s).<br/>
+              <input style={{minHeight: '26px'}} type="file" onChange={this.fileInputChanged}/>
+            </div>
+            : null
+            : <p>Write access required to upload documents</p>}
         {/*</div>*/}
       </div>
 
