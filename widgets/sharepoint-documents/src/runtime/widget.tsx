@@ -31,8 +31,7 @@ interface State {
   graphClient: any,
   selectionId: string,
   account: any,
-  writeAccess: any,
-  readAccess: any
+  permissions: {}
 }
 
 export default class Widget extends React.PureComponent<AllWidgetProps<unknown>, State> {
@@ -44,8 +43,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
     selectionId: null,
     initialized: false,
     account: null,
-    writeAccess: null,
-    readAccess: null
+    permissions: null
   }
   msalInstance;
   graphClient;
@@ -124,12 +122,12 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
   }
 
 
-  async getUserPermissions(userName) {
+  async getUserPermissions(userName, permissionsListId) {
     let writePerms = false;
     let readPerms = false;
     let urlArray = this.props.driveItemRootUrl.split('/');
     let siteUrl = `/sites/${urlArray[2]}`;
-    await this.graphClient.api(`${siteUrl}/lists/r9people/items?expand=fields`).get().then((results) => {
+    await this.graphClient.api(`${siteUrl}/lists/${permissionsListId}/items?expand=fields`).get().then((results) => {
       results.value.forEach((v) => {
         if (v.fields.First === userName) {
           if (v.fields.Title === 'Site Owner' || v.fields.Title === 'Site Member') {
@@ -142,8 +140,11 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
         }
       });
     })
-    this.setState({writeAccess: writePerms});
-    this.setState({readAccess: readPerms});
+    this.setState({permissions: {
+        read: readPerms,
+        write: writePerms
+      }
+    })
   }
 
   async initMsal() {
@@ -158,7 +159,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
     }
     this.setState({account: account});
     this.initGraphClient(account);
-    await this.getUserPermissions(this.state.account.name);
+    await this.getUserPermissions(this.state.account.name, this.props.permissionsListId);
   }
 
   // isDsConfigured = () => {
@@ -310,14 +311,14 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
           ? <h5>Click on item see related documents</h5>
           : <h5>Currently viewing documents for {this.state.selectedObjects.length} sites.</h5>}
 
-        {this.state.readAccess === true
+        {this.state.permissions.read === true
           ? this.state.selectedObjects.length > 0
             ? <VirtualScroll graphClient={this.graphClient} listUrl={this.props.listUrl}
                                relationshipListUrl={this.props.relationshipListUrl}
                                selectedObjects={this.state.selectedObjects}
                               selectionId={this.state.selectionId}
                                addedItem={this.state.newListItem}
-                                writeAccess={this.state.writeAccess}></VirtualScroll>
+                                writeAccess={this.state.permissions.write}></VirtualScroll>
               : null
           : <p>You do not currently have access the sharepoint document library. Please contact your sharepoint administrator</p>}
 
@@ -329,7 +330,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
         {/*                     addedItem={this.state.newListItem}></VirtualScroll>*/}
         {/*    : null}*/}
 
-        {this.state.writeAccess === true
+        {this.state.permissions.write === true
           ? this.state.selectedObjects.length > 0
             ? <div>
               <hr></hr>
