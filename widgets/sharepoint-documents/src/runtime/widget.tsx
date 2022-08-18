@@ -125,24 +125,33 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
   async getUserPermissions(userName, permissionsListId) {
     let writePerms = false;
     let readPerms = false;
+    let deletePerms = false;
     let urlArray = this.props.driveItemRootUrl.split('/');
     let siteUrl = `/sites/${urlArray[2]}`;
     await this.graphClient.api(`${siteUrl}/lists/${permissionsListId}/items?expand=fields`).get().then((results) => {
       results.value.forEach((v) => {
-        if (v.fields.First === userName) {
-          if (v.fields.Title === 'Site Owner' || v.fields.Title === 'Site Member') {
+        // field names for Jamestown Sharepoint site. Innovate site uses First and Title
+        if (v.fields.Title === userName) {
+          if (v.fields.PermissionGroup === 'Site Owners') {
             readPerms = true;
             writePerms = true;
-          } else if (v.fields.Title === 'Site Visitor') {
+            deletePerms = true;
+          } else if (v.fields.PermissionGroup === 'Site Member') {
+            readPerms = true;
+            writePerms = true;
+            deletePerms = false;
+          } else if (v.fields.PermissionGroup === 'Site Visitor') {
             readPerms = true;
             writePerms = false;
+            deletePerms = false;
           }
         }
       });
     })
     this.setState({permissions: {
         read: readPerms,
-        write: writePerms
+        write: writePerms,
+        delete: deletePerms
       }
     })
   }
@@ -159,6 +168,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
     }
     this.setState({account: account});
     this.initGraphClient(account);
+    console.log(this.state.account);
     await this.getUserPermissions(this.state.account.name, this.props.permissionsListId);
   }
 
@@ -318,7 +328,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
                                selectedObjects={this.state.selectedObjects}
                               selectionId={this.state.selectionId}
                                addedItem={this.state.newListItem}
-                                writeAccess={this.state.permissions.write}></VirtualScroll>
+                                deleteAccess={this.state.permissions.delete}></VirtualScroll>
               : null
           : <p>You do not currently have access the sharepoint document library. Please contact your sharepoint administrator</p>}
 
