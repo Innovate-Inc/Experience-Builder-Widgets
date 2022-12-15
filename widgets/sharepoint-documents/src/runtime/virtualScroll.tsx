@@ -1,10 +1,12 @@
 /** @jsx jsx */
+
 import {AllWidgetProps, jsx, React} from "jimu-core";
 import {useInfiniteQuery} from 'react-query';
 import {useVirtual} from 'react-virtual';
 import {ListItem} from './listItem';
 import {useState} from 'react';
 import {Loading, Button, Icon, Tooltip} from 'jimu-ui';
+import {CalciteBlock} from 'calcite-components'
 
 async function queryRelationshipList(graphClient, relationshipListUrl, globalid) {
   return graphClient.api(`${relationshipListUrl}/items?$filter=fields/RecordFK+eq+'${globalid}'`)
@@ -76,7 +78,7 @@ async function queryList(graphClient, listUrl, relationshipListUrl, globalid) {
 // }
 
 function calcItemHeight(documents) {
-  return `${50 + (documents?.length > 0 ? documents?.length * 20 : 20)}px`;
+  return `${61.5 + (documents?.length > 0 ? documents?.length * 50 : 0)}px`;
 }
 
 
@@ -104,30 +106,40 @@ function Item(props) {
     }));
   }
 
-  return (<div style={{height: calcItemHeight(documents)}}>
-    <h5 style={{marginBottom: 0}}>{props.item.LABEL}</h5>
-    {documents.length > 0
-      ? [...documents.map(i =>
-            <div style={flexboxStyle}>
-              <div style={{maxWidth:"90%"}}>
-                <Tooltip onClose={function noRefCheck(){}} onOpen={function noRefCheck(){}} title={i.fields.LinkFilename}>
-                  <a href={i.webUrl} target="_blank">
-                    <ListItem title={i.fields.LinkFilename}/>
-                  </a>
-                </Tooltip>
-              </div>
-              {props.deleteAccess === true
-              ? <Button icon onClick={remove(i)} size="sm" style={{width:"20px", height:"20px", border:"transparent"}}>
-                  <Icon
-                      icon="<svg xmlns='http://www.w3.org/2000/svg' fill='currentColor' className='bi bi-trash' viewBox='0 0 16 16'><path d='M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z'/><path fill-rule='evenodd' d='M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z'/></svg>"
-                      size="m"
-                  />
-                </Button>
-              : null}
-            </div>)]
-      : 'No documents found for this site.'}
-    <hr></hr>
-  </div>)
+  // return (<div className="p-3" style={{height: calcItemHeight(documents)}}>
+  //   <h5 style={{marginBottom: 0}}>{props.item.LABEL}</h5>
+  return (
+    <CalciteBlock
+      style={{
+        height: calcItemHeight(documents),
+        maxHeight: calcItemHeight(documents)
+      }}
+      heading={props.item.LABEL}
+      summary={documents.length > 1 ? `${documents.length} documents found` : documents.length === 1 ? "1 document found" : "No documents found for this site"}
+      open
+    >
+      {documents.length > 0
+        ? [...documents.map(i =>
+              <div>
+                <div>
+                  <Tooltip onClose={function noRefCheck(){}} onOpen={function noRefCheck(){}} title={i.fields.LinkFilename}>
+                    <a href={i.webUrl} target="_blank">
+                      <ListItem title={i.fields.LinkFilename}/>
+                    </a>
+                  </Tooltip>
+                </div>
+                {props.deleteAccess === true
+                ? <Button icon onClick={remove(i)} size="sm" style={{width:"20px", height:"20px", border:"transparent"}}>
+                    <Icon
+                        icon="<svg xmlns='http://www.w3.org/2000/svg' fill='currentColor' className='bi bi-trash' viewBox='0 0 16 16'><path d='M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z'/><path fill-rule='evenodd' d='M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z'/></svg>"
+                        size="m"
+                    />
+                  </Button>
+                : null}
+              </div>)]
+        : 'No documents found for this site.'}
+      {/* <hr></hr> */}
+    </CalciteBlock>)
 }
 
 export default function VirtualScroll(props: AllWidgetProps) {
@@ -167,6 +179,7 @@ export default function VirtualScroll(props: AllWidgetProps) {
   )
   const pageData = data ? data.pages.flat(1).map(p => p.data).flat(1) : []
 
+  console.log(data)
   const parentRef = React.useRef()
 
   const rowVirtualizer = useVirtual({
@@ -231,6 +244,7 @@ export default function VirtualScroll(props: AllWidgetProps) {
       }}
     >
       {rowVirtualizer.virtualItems.map((virtualRow) => {
+        console.log(virtualRow)
         const isLoaderRow = virtualRow.index > pageData.length - 1;
         const item = pageData[virtualRow.index];
 
@@ -244,7 +258,7 @@ export default function VirtualScroll(props: AllWidgetProps) {
                     top: 0,
                     left: 0,
                     width: "100%",
-                    // height: calcItemHeight(item),
+                    height: calcItemHeight(item),
                     transform: `translateY(${virtualRow.start}px)`
                   }}
               >

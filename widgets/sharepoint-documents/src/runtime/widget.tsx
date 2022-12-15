@@ -20,6 +20,8 @@ import {v4 as uuidv4} from 'uuid';
 import VirtualScroll from './virtualScroll';
 import {QueryClient, QueryClientProvider} from 'react-query';
 import {Loading} from 'jimu-ui';
+import {CalcitePanel} from 'calcite-components'
+
 
 interface State {
   profile: any,
@@ -131,16 +133,16 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
     await this.graphClient.api(`${siteUrl}/lists/${permissionsListId}/items?expand=fields`).get().then((results) => {
       results.value.forEach((v) => {
         // field names for Jamestown Sharepoint site. Innovate site uses First and Title
-        if (v.fields.Title === userName) {
-          if (v.fields.PermissionGroup === 'Site Owner') {
+        if (v.fields.First === userName) {
+          if (v.fields.Title === 'Site Owner') {
             readPerms = true;
             writePerms = true;
             deletePerms = true;
-          } else if (v.fields.PermissionGroup === 'Site Member') {
+          } else if (v.fields.Title === 'Site Member') {
             readPerms = true;
             writePerms = true;
             deletePerms = false;
-          } else if (v.fields.PermissionGroup === 'Site Visitor') {
+          } else if (v.fields.Title === 'Site Visitor') {
             readPerms = true;
             writePerms = false;
             deletePerms = false;
@@ -303,25 +305,34 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
     }
 
     return <QueryClientProvider client={this.queryClient} contextSharing={true}>
-      <div className="widget-subscribe" style={{
+      <CalcitePanel
+        style={{
+          height: '100%',
+          maxHeight: '100%',
+        }}
+        heading={this.state.selectedObjects.length === 0 ? "Click on item see related documents" : `Currently viewing documents for ${this.state.selectedObjects.length} sites.`}
+      >
+      {/* <div className="widget-subscribe" style={{
         maxHeight: '100%',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
         height: '100%',
         backgroundColor: 'white'
-      }}>
+      }}> */}
         {/*<div style={{*/}
         {/*  height: '100%',*/}
         {/*  overflowY: 'auto',*/}
         {/*  overflowX: 'hidden'*/}
         {/*}}>*/}
-        {this.state.selectedObjects.length === 0
+        {/* {this.state.selectedObjects.length === 0
 
           ? <h5>Click on item see related documents</h5>
-          : <h5>Currently viewing documents for {this.state.selectedObjects.length} sites.</h5>}
-
-        {this.state.permissions.read === true
+          : <h5>Currently viewing documents for {this.state.selectedObjects.length} sites.</h5>} */}
+        {/* <div class="results-container"> */}
+          {/* <div class="results-inner-container"></div> */}
+          
+                {this.state.permissions.read === true
           ? this.state.selectedObjects.length > 0
             ? <VirtualScroll graphClient={this.graphClient} listUrl={this.props.listUrl}
                                relationshipListUrl={this.props.relationshipListUrl}
@@ -331,6 +342,8 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
                                 deleteAccess={this.state.permissions.delete}></VirtualScroll>
               : null
           : <p>You do not currently have access the sharepoint document library. Please contact your sharepoint administrator</p>}
+
+        
 
         {/*{this.state.selectedObjects.length > 0*/}
         {/*  ? <VirtualScroll graphClient={this.graphClient} listUrl={this.props.listUrl}*/}
@@ -342,16 +355,16 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
 
         {this.state.permissions.write === true
           ? this.state.selectedObjects.length > 0
-            ? <div>
-              <hr></hr>
+            ? <div slot="footer">
+              {/* <hr></hr> */}
               Select a file to upload to the selected site(s).<br/>
               <input style={{minHeight: '26px'}} type="file" onChange={this.fileInputChanged}/>
             </div>
             : null
             : <p>Write access required to upload documents</p>}
         {/*</div>*/}
-      </div>
-
+      {/* </div> */}
+      </CalcitePanel>
     </QueryClientProvider>
   }
 }
