@@ -3,7 +3,6 @@
 import {AllWidgetProps, jsx, React} from "jimu-core";
 import {useInfiniteQuery} from 'react-query';
 import {useVirtual} from 'react-virtual';
-import {ListItem} from './listItem';
 import {useState} from 'react';
 import {Loading, Button, Icon, Tooltip} from 'jimu-ui';
 import {CalciteBlock, CalciteList, CalciteListItem, CalciteButton} from 'calcite-components'
