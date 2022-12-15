@@ -355,7 +355,9 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
 
         {this.state.permissions.write === true
           ? this.state.selectedObjects.length > 0
-            ? <div slot="footer">
+            ? <div slot="footer" style={{
+              width: "100%"
+            }}>
               {/* <hr></hr> */}
               Select a file to upload to the selected site(s).<br/>
               <input style={{minHeight: '26px'}} type="file" onChange={this.fileInputChanged}/>

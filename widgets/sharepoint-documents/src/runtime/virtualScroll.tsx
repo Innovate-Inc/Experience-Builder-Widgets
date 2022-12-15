@@ -6,7 +6,7 @@ import {useVirtual} from 'react-virtual';
 import {ListItem} from './listItem';
 import {useState} from 'react';
 import {Loading, Button, Icon, Tooltip} from 'jimu-ui';
-import {CalciteBlock} from 'calcite-components'
+import {CalciteBlock, CalciteList, CalciteListItem, CalciteButton} from 'calcite-components'
 
 async function queryRelationshipList(graphClient, relationshipListUrl, globalid) {
   return graphClient.api(`${relationshipListUrl}/items?$filter=fields/RecordFK+eq+'${globalid}'`)
@@ -78,7 +78,31 @@ async function queryList(graphClient, listUrl, relationshipListUrl, globalid) {
 // }
 
 function calcItemHeight(documents) {
-  return `${61.5 + (documents?.length > 0 ? documents?.length * 50 : 0)}px`;
+  return `${61.5 + (documents?.length > 0 ? documents?.length * 51 : 0)}px`;
+}
+
+function getDescription(document) {
+  let description = null
+  if (document.createdBy && document.createdBy.user && document.createdBy.user.displayName && document.createdDateTime) {
+    let createdBy = document.createdBy.user.displayName
+    let createdDate = new Date(document.createdDateTime)
+    // console.log(new Date(createdDate))
+    description = `Created ${createdDate.toLocaleString()} by ${createdBy}`
+  }
+  return description
+}
+
+function getLabel(document) {
+  let label = null
+  if (document.fields && document.fields.LinkFilename) {
+    label = document.fields.LinkFilename
+    if (label.length >= 25) {
+      let labelStart = label.substring(0,12)
+      let labelEnd = label.substring(label.length-12)
+      label = `${labelStart}...${labelEnd}`
+    }
+  }
+  return label
 }
 
 
@@ -108,6 +132,7 @@ function Item(props) {
 
   // return (<div className="p-3" style={{height: calcItemHeight(documents)}}>
   //   <h5 style={{marginBottom: 0}}>{props.item.LABEL}</h5>
+  // console.log(documents)
   return (
     <CalciteBlock
       style={{
@@ -118,7 +143,42 @@ function Item(props) {
       summary={documents.length === 0 ? "No documents found for this site" : null}
       open
     >
-      {documents.length > 0
+      {documents.length > 0 && (
+        <CalciteList>
+          {documents.map((document) => 
+            <CalciteListItem 
+              label={getLabel(document)}
+              title={document.fields.LinkFilename}
+              description={getDescription(document)}
+              nonInteractive
+            >
+              <div></div>
+              <CalciteButton
+                slot="actions-start"
+                color="neutral"
+                appearance="transparent"
+                iconEnd="launch"
+                href={document.webUrl}
+                title="View document in new tab"
+                target="_blank"
+                scale="s"
+              />
+              {props.deleteAccess === true &&
+                <CalciteButton
+                  slot="actions-end"
+                  color="neutral"
+                  appearance="transparent"
+                  iconEnd="trash"
+                  title="Delete document"
+                  scale="s"
+                  onClick={remove(document)}
+                />
+              }
+            </CalciteListItem>
+          )}
+        </CalciteList>
+      )}
+      {/* {documents.length > 0
         ? [...documents.map(i =>
               <div>
                 <div>
@@ -137,7 +197,7 @@ function Item(props) {
                   </Button>
                 : null}
               </div>)]
-        : null}
+        : null} */}
       {/* <hr></hr> */}
     </CalciteBlock>)
 }
