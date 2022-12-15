@@ -1,10 +1,10 @@
 {
-    "clientId": "941e26df-a7ca-48df-b94f-e5055704f782",
-    "tenantId": "aa08a882-9b90-48a9-ad5b-24814d59da61",
-    "siteId": "innovateinc.sharepoint.com,cd4daa23-6e5f-4b6d-a2bc-4132ea6e1b7c,c0f324f8-f271-46a0-a7c8-a48e8e5692e9",
-    "listId": "005edc0d-9ad0-43b1-bd4e-63c5d31456ae",
-    "driveId": "b!I6pNzV9ubUuivEEy6m4bfPgk88Bx8qBGp8ikjo5WkukN3F4A0JqxQ71OY8XTFFau",
-    "driveItemRootId": "01X5LTL756Y2GOVW7725BZO354PWSELRRZ",
-    "relationshipListId": "253b6d00-49c4-4b0c-811a-f55873788bcd",
-    "permissionsListId": "8b061cb9-1d51-47a7-b84e-e0e4f4ad95b0"
+    "clientId": "",
+    "tenantId": "",
+    "siteId": "",
+    "listId": "",
+    "driveId": "",
+    "driveItemRootId": "",
+    "relationshipListId": "",
+    "permissionsListId": ""
 }
