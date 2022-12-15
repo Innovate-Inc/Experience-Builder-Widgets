@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import {
   React,
   Immutable,
@@ -15,12 +17,6 @@ import {ExpressionBuilderPopup} from 'jimu-ui/advanced/expression-builder';
 import {SettingCollapse} from 'jimu-ui/advanced/setting-components';
 
 export interface Config {
-  clientId: string
-  tenantId: string
-  siteId: string
-  listId: string
-  listUrl: string
-  permissionsListId: string
   useDataSources: Immutable<UseDataSource[]>
 }
 
@@ -41,35 +37,14 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<C
 
   updateConfigProperty(property, value) {
     let settings = {
-      id: this.props.id
+      id: this.props.id,
+      config: this.props.config
     }
-    settings[property] = value;
+
+    settings.config[property] = value
+    // settings[property] = value;
     this.props.onSettingChange(settings);
   }
-
-
-  // /items//children
-  componentDidUpdate() {
-    if (this.props.siteId && this.props.listId) {
-      this.props.onSettingChange({
-        id: this.props.id,
-        listUrl: `/sites/${this.props.siteId}/lists/${this.props.listId}`
-      })
-    }
-    if (this.props.siteId && this.props.relationshipListId) {
-      this.props.onSettingChange({
-        id: this.props.id,
-        relationshipListUrl: `/sites/${this.props.siteId}/lists/${this.props.relationshipListId}`
-      })
-    }
-    if (this.props.siteId && this.props.driveId && this.props.driveItemRootId) {
-      this.props.onSettingChange({
-        id: this.props.id,
-        driveItemRootUrl: `/sites/${this.props.siteId}/drives/${this.props.driveId}/items`
-      })
-    }
-  }
-
 
   onDataSourceChange = (useDataSources: UseDataSource[]) => {
     this.props.onSettingChange({
@@ -112,12 +87,6 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<C
     })
   }
 
-  componentDidMount() {
-    if (this.props.config) {
-      this.props.onSettingChange({...this.props, ...this.props.config})
-    }
-  }
-
   render() {
     return <div className="p-2">
       {/*{this.props.listUrl}<br/>*/}
@@ -147,21 +116,21 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<C
       <br/>
       <h4>Sharepoint Settings</h4>
 
-      <TextArea placeholder='Client ID' value={this.props.clientId}
+      <TextArea placeholder='Client ID' value={this.props.config.clientId}
                 onChange={e => this.updateConfigProperty('clientId', e.target.value)}/>
-      <TextArea placeholder='Tenant ID' value={this.props.tenantId}
+      <TextArea placeholder='Tenant ID' value={this.props.config.tenantId}
                 onChange={e => this.updateConfigProperty('tenantId', e.target.value)}/>
-      <TextArea placeholder='Site ID' value={this.props.siteId}
+      <TextArea placeholder='Site ID' value={this.props.config.siteId}
                 onChange={e => this.updateConfigProperty('siteId', e.target.value)}/>
-      <TextArea placeholder='List ID' value={this.props.listId}
+      <TextArea placeholder='List ID' value={this.props.config.listId}
                 onChange={e => this.updateConfigProperty('listId', e.target.value)}/>
-      <TextArea placeholder='Drive ID' value={this.props.driveId}
+      <TextArea placeholder='Drive ID' value={this.props.config.driveId}
                 onChange={e => this.updateConfigProperty('driveId', e.target.value)}/>
-      <TextArea placeholder='DriveItem Root ID' value={this.props.driveItemRootId}
+      <TextArea placeholder='DriveItem Root ID' value={this.props.config.driveItemRootId}
                 onChange={e => this.updateConfigProperty('driveItemRootId', e.target.value)}/>
-      <TextArea placeholder='Relationship List ID' value={this.props.relationshipListId}
+      <TextArea placeholder='Relationship List ID' value={this.props.config.relationshipListId}
                 onChange={e => this.updateConfigProperty('relationshipListId', e.target.value)}/>
-      <TextArea placeholder='Permissions List ID' value={this.props.permissionsListId}
+      <TextArea placeholder='Permissions List ID' value={this.props.config.permissionsListId}
                 onChange={e => this.updateConfigProperty('permissionsListId', e.target.value)}/>
     </div>
   }
