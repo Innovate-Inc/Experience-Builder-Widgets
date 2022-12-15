@@ -132,7 +132,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
       results.value.forEach((v) => {
         // field names for Jamestown Sharepoint site. Innovate site uses First and Title
         if (v.fields.Title === userName) {
-          if (v.fields.PermissionGroup === 'Site Owners') {
+          if (v.fields.PermissionGroup === 'Site Owner') {
             readPerms = true;
             writePerms = true;
             deletePerms = true;
