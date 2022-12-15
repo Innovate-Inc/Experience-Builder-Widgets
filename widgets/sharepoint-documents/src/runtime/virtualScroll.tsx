@@ -115,7 +115,7 @@ function Item(props) {
         maxHeight: calcItemHeight(documents)
       }}
       heading={props.item.LABEL}
-      summary={documents.length > 1 ? `${documents.length} documents found` : documents.length === 1 ? "1 document found" : "No documents found for this site"}
+      summary={documents.length === 0 ? "No documents found for this site" : null}
       open
     >
       {documents.length > 0
@@ -137,7 +137,7 @@ function Item(props) {
                   </Button>
                 : null}
               </div>)]
-        : 'No documents found for this site.'}
+        : null}
       {/* <hr></hr> */}
     </CalciteBlock>)
 }
@@ -244,9 +244,12 @@ export default function VirtualScroll(props: AllWidgetProps) {
       }}
     >
       {rowVirtualizer.virtualItems.map((virtualRow) => {
-        console.log(virtualRow)
         const isLoaderRow = virtualRow.index > pageData.length - 1;
         const item = pageData[virtualRow.index];
+        let itemDocuments = []
+        if (documents && item && item.UNIQUE_ID && documents.hasOwnProperty(item.UNIQUE_ID)) {
+          itemDocuments = documents[item.UNIQUE_ID]
+        }
 
         return (
               <div
@@ -258,12 +261,12 @@ export default function VirtualScroll(props: AllWidgetProps) {
                     top: 0,
                     left: 0,
                     width: "100%",
-                    height: calcItemHeight(item),
+                    height: calcItemHeight(itemDocuments),
                     transform: `translateY(${virtualRow.start}px)`
                   }}
               >
                 {isLoaderRow ? hasNextPage ? <Loading type='SECONDARY'/> : 'Done' :
-                    <Item item={item} documents={documents[item.UNIQUE_ID]} graphClient={props.graphClient}
+                    <Item item={item} documents={itemDocuments} graphClient={props.graphClient}
                           relationshipListUrl={props.relationshipListUrl} deleteAccess={props.deleteAccess}></Item>}
               </div>
         )
