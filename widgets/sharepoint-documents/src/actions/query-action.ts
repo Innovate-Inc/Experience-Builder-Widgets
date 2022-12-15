@@ -42,7 +42,7 @@ export default class QueryAction extends AbstractMessageAction {
           DATASOURCE_ID: dataSourceId
         }
       })));
-    getAppStore().dispatch(appActions.widgetStatePropChange(this.widgetId, 'selectionId', uuidv4());
+    getAppStore().dispatch(appActions.widgetStatePropChange(this.widgetId, 'selectionId', uuidv4()));
 
     // }
     return true;
