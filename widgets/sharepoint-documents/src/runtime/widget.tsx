@@ -33,7 +33,10 @@ interface State {
   graphClient: any,
   selectionId: string,
   account: any,
-  permissions: {}
+  permissions: {},
+  listUrl: string,
+  relationshipListUrl: string,
+  driveItemRootUrl: string
 }
 
 export default class Widget extends React.PureComponent<AllWidgetProps<unknown>, State> {
@@ -121,6 +124,21 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
     this.initMsal().then(() => {
       this.setState({initialized: true});
     })
+    if (this.props.config.siteId && this.props.config.listId) {
+      this.setState({
+        listUrl: `/sites/${this.props.config.siteId}/lists/${this.props.config.listId}`
+      })
+    }
+    if (this.props.config.siteId && this.props.config.relationshipListId) {
+      this.setState({
+        relationshipListUrl: `/sites/${this.props.config.siteId}/lists/${this.props.config.relationshipListId}`
+      })
+    }
+    if (this.props.config.siteId && this.props.config.driveId && this.props.config.driveItemRootId) {
+      this.setState({
+        driveItemRootUrl: `/sites/${this.props.config.siteId}/drives/${this.props.config.driveId}/items`
+      })
+    }
   }
 
 
@@ -128,21 +146,21 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
     let writePerms = false;
     let readPerms = false;
     let deletePerms = false;
-    let urlArray = this.props.driveItemRootUrl.split('/');
+    let urlArray = this.state.driveItemRootUrl.split('/');
     let siteUrl = `/sites/${urlArray[2]}`;
     await this.graphClient.api(`${siteUrl}/lists/${permissionsListId}/items?expand=fields`).get().then((results) => {
       results.value.forEach((v) => {
         // field names for Jamestown Sharepoint site. Innovate site uses First and Title
-        if (v.fields.Title === userName) {
-          if (v.fields.PermissionGroup === 'Site Owner') {
+        if (v.fields.First === userName) {
+          if (v.fields.Title === 'Site Owner') {
             readPerms = true;
             writePerms = true;
             deletePerms = true;
-          } else if (v.fields.PermissionGroup === 'Site Member') {
+          } else if (v.fields.Title === 'Site Member') {
             readPerms = true;
             writePerms = true;
             deletePerms = false;
-          } else if (v.fields.PermissionGroup === 'Site Visitor') {
+          } else if (v.fields.Title === 'Site Visitor') {
             readPerms = true;
             writePerms = false;
             deletePerms = false;
@@ -171,7 +189,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
     this.setState({account: account});
     this.initGraphClient(account);
     console.log(this.state.account);
-    await this.getUserPermissions(this.state.account.name, this.props.permissionsListId);
+    await this.getUserPermissions(this.state.account.name, this.props.config.permissionsListId);
   }
 
   // isDsConfigured = () => {
@@ -187,8 +205,8 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
   setMsalConfig() {
     const msalConfig = {
       auth: {
-        clientId: this.props.clientId,
-        authority: `https://login.microsoftonline.com/${this.props.tenantId}`
+        clientId: this.props.config.clientId,
+        authority: `https://login.microsoftonline.com/${this.props.config.tenantId}`
       }
     }
     this.msalInstance = new PublicClientApplication(msalConfig)
@@ -244,7 +262,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
       return this.multipartUpload(file)
     } else {
       return this.graphClient
-        .api(`${this.props.driveItemRootUrl}/${this.props.driveItemRootId}:/${uuidv4()}/${file.name}:/content`)
+        .api(`${this.props.driveItemRootUrl}/${this.props.config.driveItemRootId}:/${uuidv4()}/${file.name}:/content`)
         .put(file)
     }
   }
@@ -253,7 +271,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
   async multipartUpload(file) {
     const session = await LargeFileUploadTask.createUploadSession(
       this.graphClient,
-      `${this.props.driveItemRootUrl}/${this.props.driveItemRootId}:/${uuidv4()}/${file.name}:/createUploadSession`);
+      `${this.props.driveItemRootUrl}/${this.props.config.driveItemRootId}:/${uuidv4()}/${file.name}:/createUploadSession`);
 
     const f = new FileUpload(
       file,
@@ -334,8 +352,8 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
           
                 {this.state.permissions.read === true
           ? this.state.selectedObjects.length > 0
-            ? <VirtualScroll graphClient={this.graphClient} listUrl={this.props.listUrl}
-                               relationshipListUrl={this.props.relationshipListUrl}
+            ? <VirtualScroll graphClient={this.graphClient} listUrl={this.state.listUrl}
+                               relationshipListUrl={this.state.relationshipListUrl}
                                selectedObjects={this.state.selectedObjects}
                               selectionId={this.state.selectionId}
                                addedItem={this.state.newListItem}
