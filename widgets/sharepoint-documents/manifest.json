@@ -3,10 +3,10 @@
   "label": "Documents",
   "dependency": "jimu-arcgis",
   "type": "widget",
-  "version": "1.8.0",
+  "version": "1.0.0",
   "exbVersion": "1.8.0",
-  "author": "Esri R&D Center Beijing",
-  "description": "This is the widget used in developer guide",
+  "author": "Innovate, Inc.!",
+  "description": "This is used to interface with Sharepoint resources.",
   "copyright": "",
   "license": "http://www.apache.org/licenses/LICENSE-2.0",
   "messageActions": [
