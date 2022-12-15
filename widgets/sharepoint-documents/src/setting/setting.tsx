@@ -112,6 +112,12 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<C
     })
   }
 
+  componentDidMount() {
+    if (this.props.config) {
+      this.props.onSettingChange({...this.props, ...this.props.config})
+    }
+  }
+
   render() {
     return <div className="p-2">
       {/*{this.props.listUrl}<br/>*/}
