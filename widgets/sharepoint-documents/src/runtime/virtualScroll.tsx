@@ -107,6 +107,7 @@ function getLabel(document) {
 
 function Item(props) {
   const [documents, setDocuments] = useState(props.documents);
+  const [deleting, setDeleting] = useState(props.deleting)
 
   const flexboxStyle = {
     display: "flex",
@@ -119,6 +120,10 @@ function Item(props) {
   React.useEffect(() => {
 
   })
+
+  const confirmRemove = (doc) => () => {
+    setDeleting(doc.fields.id)
+  }
 
   const remove = (doc) => () => {
     deleteRelationship(props.graphClient, props.relationshipListUrl, doc, props.item.UNIQUE_ID);
@@ -145,23 +150,25 @@ function Item(props) {
         <CalciteList>
           {documents.map((document) => 
             <CalciteListItem 
-              label={getLabel(document)}
-              title={document.fields.LinkFilename}
-              description={getDescription(document)}
+              label={deleting != document.fields.id ? getLabel(document) : "Delete this document?"}
+              title={deleting != document.fields.id ? document.fields.LinkFilename : "Delete this document?"}
+              description={deleting != document.fields.id ? getDescription(document) : getLabel(document)}
               nonInteractive
             >
-              <div></div>
-              <CalciteButton
-                slot="actions-start"
-                color="neutral"
-                appearance="transparent"
-                iconEnd="launch"
-                href={document.webUrl}
-                title="View document in new tab"
-                target="_blank"
-                scale="s"
-              />
-              {props.deleteAccess === true &&
+              {deleting != document.fields.id &&
+                <CalciteButton
+                  slot="actions-start"
+                  color="neutral"
+                  appearance="transparent"
+                  iconEnd="launch"
+                  href={document.webUrl}
+                  title="View document in new tab"
+                  target="_blank"
+                  scale="s"
+                />
+              }
+              
+              {props.deleteAccess === true && deleting != document.fields.id ?
                 <CalciteButton
                   slot="actions-end"
                   color="neutral"
@@ -169,8 +176,25 @@ function Item(props) {
                   iconEnd="trash"
                   title="Delete document"
                   scale="s"
-                  onClick={remove(document)}
+                  onClick={confirmRemove(document)}
                 />
+                :
+                <div slot="actions-end">
+                  <CalciteButton
+                    title="Yes"
+                    className="px-1"
+                    onClick={remove(document)}
+                  >
+                    Yes
+                  </CalciteButton>
+                  <CalciteButton
+                    title="No"
+                    className="px-1"
+                    onClick={() => setDeleting(null)}
+                  >
+                    No
+                  </CalciteButton>
+                </div>
               }
             </CalciteListItem>
           )}
@@ -324,7 +348,7 @@ export default function VirtualScroll(props: AllWidgetProps) {
               >
                 {isLoaderRow ? hasNextPage ? <Loading type='SECONDARY'/> : 'Done' :
                     <Item item={item} documents={itemDocuments} graphClient={props.graphClient}
-                          relationshipListUrl={props.relationshipListUrl} deleteAccess={props.deleteAccess}></Item>}
+                          relationshipListUrl={props.relationshipListUrl} deleteAccess={props.deleteAccess} deleting={null}></Item>}
               </div>
         )
       })}
