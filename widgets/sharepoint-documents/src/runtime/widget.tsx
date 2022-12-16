@@ -82,7 +82,6 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
     })
   }
   componentDidUpdate(prevProps: AllWidgetProps<unknown>) {
-    console.log('componentDidUpdate');
     if (this.props.stateProps?.selectionId !== undefined && this.props.stateProps.selectionId !== this.state.selectionId) {
       this.setState({
         selectedObjects: this.props.stateProps.selectedObjects.map(o => {

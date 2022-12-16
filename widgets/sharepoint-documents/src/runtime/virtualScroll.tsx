@@ -95,9 +95,9 @@ function getLabel(document) {
   let label = null
   if (document.fields && document.fields.LinkFilename) {
     label = document.fields.LinkFilename
-    if (label.length >= 25) {
-      let labelStart = label.substring(0,12)
-      let labelEnd = label.substring(label.length-12)
+    if (label.length >= 40) {
+      let labelStart = label.substring(0,20)
+      let labelEnd = label.substring(label.length-20)
       label = `${labelStart}...${labelEnd}`
     }
   }
@@ -117,8 +117,7 @@ function Item(props) {
   }
 
   React.useEffect(() => {
-    console.log("item log");
-    console.log(documents);
+
   })
 
   const remove = (doc) => () => {
@@ -238,7 +237,6 @@ export default function VirtualScroll(props: AllWidgetProps) {
   )
   const pageData = data ? data.pages.flat(1).map(p => p.data).flat(1) : []
 
-  console.log(data)
   const parentRef = React.useRef()
 
   const rowVirtualizer = useVirtual({
@@ -263,7 +261,6 @@ export default function VirtualScroll(props: AllWidgetProps) {
 
 
   React.useEffect(() => {
-    console.log('rebuilding virtual scroll')
     const [lastItem] = [...rowVirtualizer.virtualItems].reverse();
 
     if (!lastItem) {
@@ -299,7 +296,8 @@ export default function VirtualScroll(props: AllWidgetProps) {
       style={{
         height: `${rowVirtualizer.totalSize}px`,
         width: "100%",
-        position: "relative"
+        position: "relative",
+        marginTop: "-0.5rem"
       }}
     >
       {rowVirtualizer.virtualItems.map((virtualRow) => {
