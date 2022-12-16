@@ -95,10 +95,10 @@ function getLabel(document) {
   let label = null
   if (document.fields && document.fields.LinkFilename) {
     label = document.fields.LinkFilename
-    if (label.length >= 40) {
-      let labelStart = label.substring(0,20)
-      let labelEnd = label.substring(label.length-20)
-      label = `${labelStart}...${labelEnd}`
+    if (label.length >= 30) {
+      let labelStart = label.substring(0,15)
+      let labelEnd = label.substring(label.length-15)
+      label = `${labelStart}[...]${labelEnd}`
     }
   }
   return label
