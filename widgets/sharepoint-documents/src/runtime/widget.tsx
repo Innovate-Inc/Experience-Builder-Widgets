@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import {
   React,
   utils,
@@ -8,14 +10,12 @@ import {
   IMDataSourceInfo,
   ExpressionResolverComponent,
 } from 'jimu-core'
-import Query from 'esri/tasks/support/Query'
 import {Client, FileUpload, LargeFileUploadTask} from '@microsoft/microsoft-graph-client'
 import {InteractionType, PublicClientApplication} from '@azure/msal-browser'
 import {
   AuthCodeMSALBrowserAuthenticationProvider,
   AuthCodeMSALBrowserAuthenticationProviderOptions
 } from '@microsoft/microsoft-graph-client/authProviders/authCodeMsalBrowser'
-import {ListItem} from './listItem'
 import {v4 as uuidv4} from 'uuid';
 import VirtualScroll from './virtualScroll';
 import {QueryClient, QueryClientProvider} from 'react-query';
@@ -150,16 +150,18 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
     await this.graphClient.api(`${siteUrl}/lists/${permissionsListId}/items?expand=fields`).get().then((results) => {
       results.value.forEach((v) => {
         // field names for Jamestown Sharepoint site. Innovate site uses First and Title
-        if (v.fields.First === userName) {
-          if (v.fields.Title === 'Site Owner') {
+        if (v.fields.Title === userName) {
+          if (v.fields.PermissionGroup === 'Site Owners') {
             readPerms = true;
             writePerms = true;
             deletePerms = true;
-          } else if (v.fields.Title === 'Site Member') {
+          } else if (v.fields.PermissionGroup === 'Site Member') {
+          } else if (v.fields.PermissionGroup === 'Site Member') {
             readPerms = true;
             writePerms = true;
             deletePerms = false;
-          } else if (v.fields.Title === 'Site Visitor') {
+          } else if (v.fields.PermissionGroup === 'Site Visitor') {
+          } else if (v.fields.PermissionGroup === 'Site Visitor') {
             readPerms = true;
             writePerms = false;
             deletePerms = false;
@@ -183,11 +185,10 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
     try {
       account = await this.msalLogin()
     } catch {
-      account = await this.getMsalConcent()
+      account = await this.getMsalConsent()
     }
     this.setState({account: account});
     this.initGraphClient(account);
-    console.log(this.state.account);
     await this.getUserPermissions(this.state.account.name, this.props.config.permissionsListId);
   }
 
@@ -222,7 +223,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
     return this.graphClient;
   }
 
-  async getMsalConcent() {
+  async getMsalConsent() {
     console.log('failed.. getting consent')
     const response = await this.msalInstance.loginPopup(this.loginRequest)
     console.log('consent complete')

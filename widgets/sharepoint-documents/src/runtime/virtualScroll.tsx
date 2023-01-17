@@ -86,7 +86,7 @@ function getDescription(document) {
     let createdBy = document.createdBy.user.displayName
     let createdDate = new Date(document.createdDateTime)
     // console.log(new Date(createdDate))
-    description = `Created ${createdDate.toLocaleString()} by ${createdBy}`
+    description = `Uploaded ${createdDate.toLocaleString()} by ${createdBy}`
   }
   return description
 }
