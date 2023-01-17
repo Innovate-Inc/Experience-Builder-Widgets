@@ -156,9 +156,11 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
             writePerms = true;
             deletePerms = true;
           } else if (v.fields.PermissionGroup === 'Site Member') {
+          } else if (v.fields.PermissionGroup === 'Site Member') {
             readPerms = true;
             writePerms = true;
             deletePerms = false;
+          } else if (v.fields.PermissionGroup === 'Site Visitor') {
           } else if (v.fields.PermissionGroup === 'Site Visitor') {
             readPerms = true;
             writePerms = false;
