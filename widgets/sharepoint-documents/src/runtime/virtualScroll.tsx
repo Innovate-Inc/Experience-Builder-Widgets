@@ -85,7 +85,6 @@ function getDescription(document) {
   if (document.createdBy && document.createdBy.user && document.createdBy.user.displayName && document.createdDateTime) {
     let createdBy = document.createdBy.user.displayName
     let createdDate = new Date(document.createdDateTime)
-    // console.log(new Date(createdDate))
     description = `Uploaded ${createdDate.toLocaleDateString()} by ${createdBy}`
   }
   return description
@@ -95,9 +94,6 @@ function getLabel(document) {
   let label = null
   if (document.fields && document.fields.LinkFilename) {
     label = document.fields.LinkFilename
-    // if (label.length >= 45) {
-    //   label = `${label.substring(0, 40)}...`
-    // }
   }
   return label
 }
