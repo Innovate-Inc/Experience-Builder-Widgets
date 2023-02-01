@@ -129,7 +129,6 @@ function Item(props) {
 
   // return (<div className="p-3" style={{height: calcItemHeight(documents)}}>
   //   <h5 style={{marginBottom: 0}}>{props.item.LABEL}</h5>
-  // console.log(documents)
   return (
     <CalciteBlock
       style={{
@@ -252,16 +251,17 @@ export default function VirtualScroll(props: AllWidgetProps) {
           console.log(p)
           console.log(upload)
           if (upload.recordId === p.UNIQUE_ID) {
-            documents[p.UNIQUE_ID].push(upload.document)
-            c = c + documents[p.UNIQUE_ID].length;
+            if (!documents[p.UNIQUE_ID].includes(upload.document)) {
+              documents[p.UNIQUE_ID].push(upload.document)
+              c = c + documents[p.UNIQUE_ID].length;
+            }
           }
         });
         setDocuments(documents);
         setDocumentCount(c);
-
       })
     }
-  }, [props.addedItem])
+  }, [props.sessionUploads])
 
 
   React.useEffect(() => {
