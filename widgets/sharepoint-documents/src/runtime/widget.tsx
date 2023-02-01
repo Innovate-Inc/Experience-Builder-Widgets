@@ -10,17 +10,17 @@ import {
   IMDataSourceInfo,
   ExpressionResolverComponent,
 } from 'jimu-core'
-import {Client, FileUpload, LargeFileUploadTask} from '@microsoft/microsoft-graph-client'
-import {InteractionType, PublicClientApplication} from '@azure/msal-browser'
+import { Client, FileUpload, LargeFileUploadTask } from '@microsoft/microsoft-graph-client'
+import { InteractionType, PublicClientApplication } from '@azure/msal-browser'
 import {
   AuthCodeMSALBrowserAuthenticationProvider,
   AuthCodeMSALBrowserAuthenticationProviderOptions
 } from '@microsoft/microsoft-graph-client/authProviders/authCodeMsalBrowser'
-import {v4 as uuidv4} from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import VirtualScroll from './virtualScroll';
-import {QueryClient, QueryClientProvider} from 'react-query';
-import {Loading} from 'jimu-ui';
-import {CalcitePanel} from 'calcite-components'
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { Loading } from 'jimu-ui';
+import { CalcitePanel } from 'calcite-components'
 
 
 interface State {
@@ -36,7 +36,8 @@ interface State {
   permissions: {},
   listUrl: string,
   relationshipListUrl: string,
-  driveItemRootUrl: string
+  driveItemRootUrl: string,
+  sessionUploads: any[]
 }
 
 export default class Widget extends React.PureComponent<AllWidgetProps<unknown>, State> {
@@ -48,11 +49,12 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
     selectionId: null,
     initialized: false,
     account: null,
-    permissions: null
+    permissions: null,
+    sessionUploads: []
   }
   msalInstance;
   graphClient;
-  loginRequest = {scopes: ['user.read', 'profile', 'Sites.Read.All', 'Sites.ReadWrite.All']};
+  loginRequest = { scopes: ['user.read', 'profile', 'Sites.Read.All', 'Sites.ReadWrite.All'] };
   profile;
   account;
 
@@ -88,8 +90,8 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
 
           o.LABEL = this.flatDataSources[o.DATASOURCE_ID].expression
             ? this.renderExpression(
-            this.flatDataSources[o.DATASOURCE_ID].expression.parts,
-            o.attributes) : o.attributes[o.DEFAULT_LABEL_FIELD]
+              this.flatDataSources[o.DATASOURCE_ID].expression.parts,
+              o.attributes) : o.attributes[o.DEFAULT_LABEL_FIELD]
 
           return o
         }),
@@ -121,7 +123,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
       }
     })
     this.initMsal().then(() => {
-      this.setState({initialized: true});
+      this.setState({ initialized: true });
     })
     if (this.props.config.siteId && this.props.config.listId) {
       this.setState({
@@ -133,6 +135,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
         relationshipListUrl: `/sites/${this.props.config.siteId}/lists/${this.props.config.relationshipListId}`
       })
     }
+    // console.log(this.props.config)
     if (this.props.config.siteId && this.props.config.driveId && this.props.config.driveItemRootId) {
       this.setState({
         driveItemRootUrl: `/sites/${this.props.config.siteId}/drives/${this.props.config.driveId}/items`
@@ -169,7 +172,8 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
         }
       });
     })
-    this.setState({permissions: {
+    this.setState({
+      permissions: {
         read: readPerms,
         write: writePerms,
         delete: deletePerms
@@ -187,20 +191,10 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
     } catch {
       account = await this.getMsalConsent()
     }
-    this.setState({account: account});
+    this.setState({ account: account });
     this.initGraphClient(account);
     await this.getUserPermissions(this.state.account.name, this.props.config.permissionsListId);
   }
-
-  // isDsConfigured = () => {
-  //   if (this.props.useDataSources &&
-  //     this.props.useDataSources.length === 1 &&
-  //     this.props.useDataSources[0].fields &&
-  //     this.props.useDataSources[0].fields.length === 1) {
-  //     return true;
-  //   }
-  //   return false;
-  // }
 
   setMsalConfig() {
     const msalConfig = {
@@ -219,7 +213,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
       scopes: this.loginRequest.scopes
     }
     const authProvider = new AuthCodeMSALBrowserAuthenticationProvider(this.msalInstance, options)
-    this.graphClient = Client.initWithMiddleware({authProvider});
+    this.graphClient = Client.initWithMiddleware({ authProvider });
     return this.graphClient;
   }
 
@@ -238,31 +232,12 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
     })
   }
 
-  //
-  // async setMsalToken () {
-  //   const tokenResponse = await this.msalInstance.acquireTokenSilent(this.loginRequest)
-  //   this.setState({ msalToken: tokenResponse.accessToken })
-  // }
-
-  // for testing
-  // getUserProfile = (e) => {
-  //     // fetch('https://graph.microsoft.com/v1.0/me', {
-  //     //     headers: {
-  //     //         Authorization: `Bearer ${this.state.msalToken}`
-  //     //     }
-  //     // }).then(r => r.json()).then(profile => {
-  //     //     this.setState({profile});
-  //     // });
-  //     this.graphClient.api('me').get().then(profile => this.setState({profile}))
-  // }
-
-
   uploadFile(file) {
     if (file.size > 4 * 1024 * 1024) {
       return this.multipartUpload(file)
     } else {
       return this.graphClient
-        .api(`${this.props.driveItemRootUrl}/${this.props.config.driveItemRootId}:/${uuidv4()}/${file.name}:/content`)
+        .api(`${this.state.driveItemRootUrl}/${this.props.config.driveItemRootId}:/${uuidv4()}/${file.name}:/content`)
         .put(file)
     }
   }
@@ -271,7 +246,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
   async multipartUpload(file) {
     const session = await LargeFileUploadTask.createUploadSession(
       this.graphClient,
-      `${this.props.driveItemRootUrl}/${this.props.config.driveItemRootId}:/${uuidv4()}/${file.name}:/createUploadSession`);
+      `${this.state.driveItemRootUrl}/${this.props.config.driveItemRootId}:/${uuidv4()}/${file.name}:/createUploadSession`);
 
     const f = new FileUpload(
       file,
@@ -287,20 +262,26 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
     const file = e.target.files[0]
     const driveItem = await this.uploadFile(file)
     const newListItem = await this.getDriveItemListItem(driveItem)
-    this.createRelationshipListItems(newListItem.id);
-    this.setState({newListItem});
+    this.createRelationshipListItems(newListItem);
+    this.setState({ newListItem });
     e.target.value = null
   }
 
   getDriveItemListItem(driveItem) {
-    return this.graphClient.api(`${this.props.driveItemRootUrl}/${driveItem.id}/listItem`).get()
+    return this.graphClient.api(`${this.state.driveItemRootUrl}/${driveItem.id}/listItem`).get()
   }
 
-  createRelationshipListItems(DocumentFKLookupId) {
+  createRelationshipListItems(newListItem) {
+    const DocumentFKLookupId = newListItem.id
+    let newSessionUploads = []
     this.state.selectedObjects.forEach(i => {
-      // const itemId = this.re.exec()[1];
       const RecordFK = i.UNIQUE_ID;
-      return this.graphClient.api(`${this.props.relationshipListUrl}/items`).post(
+      let upload = {
+        recordId: RecordFK,
+        document: newListItem
+      }
+      newSessionUploads.push(upload)
+      return this.graphClient.api(`${this.state.relationshipListUrl}/items`).post(
         {
           fields: {
             RecordFK,
@@ -309,17 +290,15 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
         }
       )
     })
+    this.setState({
+      sessionUploads: this.state.sessionUploads.concat(newSessionUploads)
+    })
   }
 
 
   render() {
-    // if (!this.isDsConfigured()) {
-    //   return <h3>
-    //     Please config data source.
-    //   </h3>;
-    // }
     if (!this.state.initialized) {
-      return <Loading type='SECONDARY'/>
+      return <Loading type='SECONDARY' />
     }
 
     return <QueryClientProvider client={this.queryClient} contextSharing={true}>
@@ -330,46 +309,18 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
         }}
         heading={this.state.selectedObjects.length === 0 ? "Click on item see related documents" : `Currently viewing documents for ${this.state.selectedObjects.length} sites.`}
       >
-      {/* <div className="widget-subscribe" style={{
-        maxHeight: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        height: '100%',
-        backgroundColor: 'white'
-      }}> */}
-        {/*<div style={{*/}
-        {/*  height: '100%',*/}
-        {/*  overflowY: 'auto',*/}
-        {/*  overflowX: 'hidden'*/}
-        {/*}}>*/}
-        {/* {this.state.selectedObjects.length === 0
 
-          ? <h5>Click on item see related documents</h5>
-          : <h5>Currently viewing documents for {this.state.selectedObjects.length} sites.</h5>} */}
-        {/* <div class="results-container"> */}
-          {/* <div class="results-inner-container"></div> */}
-          
-                {this.state.permissions.read === true
+        {this.state.permissions.read === true
           ? this.state.selectedObjects.length > 0
             ? <VirtualScroll graphClient={this.graphClient} listUrl={this.state.listUrl}
-                               relationshipListUrl={this.state.relationshipListUrl}
-                               selectedObjects={this.state.selectedObjects}
-                              selectionId={this.state.selectionId}
-                               addedItem={this.state.newListItem}
-                                deleteAccess={this.state.permissions.delete}></VirtualScroll>
-              : null
+              relationshipListUrl={this.state.relationshipListUrl}
+              selectedObjects={this.state.selectedObjects}
+              selectionId={this.state.selectionId}
+              // addedItem={this.state.newListItem}
+              sessionUploads={this.state.sessionUploads}
+              deleteAccess={this.state.permissions.delete}></VirtualScroll>
+            : null
           : <p>You do not currently have access the sharepoint document library. Please contact your sharepoint administrator</p>}
-
-        
-
-        {/*{this.state.selectedObjects.length > 0*/}
-        {/*  ? <VirtualScroll graphClient={this.graphClient} listUrl={this.props.listUrl}*/}
-        {/*                     relationshipListUrl={this.props.relationshipListUrl}*/}
-        {/*                     selectedObjects={this.state.selectedObjects}*/}
-        {/*                    selectionId={this.state.selectionId}*/}
-        {/*                     addedItem={this.state.newListItem}></VirtualScroll>*/}
-        {/*    : null}*/}
 
         {this.state.permissions.write === true
           ? this.state.selectedObjects.length > 0
@@ -377,13 +328,11 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
               width: "100%"
             }}>
               {/* <hr></hr> */}
-              Select a file to upload to the selected site(s).<br/>
-              <input style={{minHeight: '26px'}} type="file" onChange={this.fileInputChanged}/>
+              Select a file to upload to the selected site(s).<br />
+              <input style={{ minHeight: '26px' }} type="file" onChange={this.fileInputChanged} />
             </div>
             : null
-            : <p>Write access required to upload documents</p>}
-        {/*</div>*/}
-      {/* </div> */}
+          : <p>Write access required to upload documents</p>}
       </CalcitePanel>
     </QueryClientProvider>
   }
