@@ -19,8 +19,8 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import VirtualScroll from './virtualScroll';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { Loading } from 'jimu-ui';
-import { CalcitePanel } from 'calcite-components'
+import { Loading, Row, Col } from 'jimu-ui';
+import { CalcitePanel, CalciteInput, CalciteButton } from 'calcite-components'
 
 
 interface State {
@@ -37,7 +37,8 @@ interface State {
   listUrl: string,
   relationshipListUrl: string,
   driveItemRootUrl: string,
-  sessionUploads: any[]
+  sessionUploads: any[],
+  searchText: string
 }
 
 export default class Widget extends React.PureComponent<AllWidgetProps<unknown>, State> {
@@ -50,7 +51,8 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
     initialized: false,
     account: null,
     permissions: null,
-    sessionUploads: []
+    sessionUploads: [],
+    searchText: ''
   }
   msalInstance;
   graphClient;
@@ -100,22 +102,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
     }
   }
 
-  // shouldComponentUpdate(nextProps, nextState) {
-  //   console.log('shouldComponentUpdate')
-  //   // console.log(nextProps, nextState);
-  //   // if (this.props.state === 'CLOSED' && nextProps.state !== 'CLOSED') {
-  //   //   return true;
-  //   // }
-  //   // return this.state.globalIds !== nextState.globalIds;
-  //   // this doesn't work in list view as window... is it still needed b/c of changes to virtual scroll component?
-  //   // if (this.props.stateProps) {
-  //   //   return this.props.stateProps?.selectionId !== nextProps.stateProps?.selectionId
-  //   // }
-  //   return true;
-  // }
-
   componentDidMount() {
-    console.log('componentDidMount')
     this.props.useDataSources.forEach(ds => {
       this.flatDataSources[ds.dataSourceId] = ds
       if (ds.expression) {
@@ -293,8 +280,17 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
     })
   }
 
+  updateSearchInput(evt) {
+    let value = ''
+    if (evt.target && evt.target.parentElement && evt.target.parentElement.value) {
+      value = evt.target.parentElement.value
+    }
+    return value;
+  }
+
 
   render() {
+    // console.log(this.state)
     if (!this.state.initialized) {
       return <Loading type='SECONDARY' />
     }
@@ -305,9 +301,54 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
           height: '100%',
           maxHeight: '100%',
         }}
-        heading={this.state.selectedObjects.length === 0 ? "Click on item see related documents" : `Currently viewing documents for ${this.state.selectedObjects.length} sites.`}
+        heading='Parcel Document Management'
       >
-
+        <div className="m-2">
+          {this.state.permissions.read === true ? 
+            "Select a feature on the map or in the table to view documents related to that feature. You can also filter by file name." :
+            "You do not currently have access the sharepoint document library. Please contact your sharepoint administrator"
+          }
+        </div>
+        
+        {this.state.permissions.read === true ? 
+          <div>
+            <Row className="m-2 p-0">
+              <Col className="col-12 m-0 p-0">
+                <CalciteInput placeholder="Filter by file name" type="search">
+                  <CalciteButton
+                    slot="action"
+                    title="Search"
+                    className="px-2"
+                    onClick={(evt) => {
+                      let value = this.updateSearchInput(evt)
+                      this.setState({
+                        searchText: value
+                      })
+                    }}
+                  >
+                    Search
+                  </CalciteButton>
+                </CalciteInput>
+              </Col>
+              {/* <Col className="col-4 m-0 p-0">
+                <CalciteButton
+                  title="Search"
+                  className="px-2"
+                  // onClick={remove(document)}
+                >
+                  Search
+                </CalciteButton>
+              </Col> */}
+            </Row>
+            {this.state.selectedObjects.length > 0 ?
+              <Row className="m-2 p-0">
+                {`Currently viewing documents for ${this.state.selectedObjects.length} sites.`}
+              </Row>
+              : null
+            }
+          </div>
+          : null
+        }
         {this.state.permissions.read === true
           ? this.state.selectedObjects.length > 0
             ? <VirtualScroll graphClient={this.graphClient} listUrl={this.state.listUrl}
@@ -316,21 +357,27 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
               selectionId={this.state.selectionId}
               // addedItem={this.state.newListItem}
               sessionUploads={this.state.sessionUploads}
-              deleteAccess={this.state.permissions.delete}></VirtualScroll>
+              deleteAccess={this.state.permissions.delete}
+              searchText={this.state.searchText}
+            />
             : null
-          : <p>You do not currently have access the sharepoint document library. Please contact your sharepoint administrator</p>}
+          : null
+        }
 
-        {this.state.permissions.write === true
-          ? this.state.selectedObjects.length > 0
-            ? <div slot="footer" style={{
-              width: "100%"
-            }}>
-              {/* <hr></hr> */}
-              Select a file to upload to the selected site(s).<br />
-              <input style={{ minHeight: '26px' }} type="file" onChange={this.fileInputChanged} />
-            </div>
-            : null
-          : <p>Write access required to upload documents</p>}
+        <div slot="footer" style={{
+          width: "100%"
+        }}>
+          {this.state.permissions.write === true
+            ? this.state.selectedObjects.length > 0
+              ?
+                <div>
+                  Select a file to upload to the selected site(s).<br />
+                  <input style={{ minHeight: '26px' }} type="file" onChange={this.fileInputChanged} />
+                </div>
+              : null
+            : 'Write access required to upload documents.'
+          }
+        </div>
       </CalcitePanel>
     </QueryClientProvider>
   }

@@ -1,4 +1,5 @@
 /** @jsx jsx */
+/* eslint-disable */
 
 import { AllWidgetProps, jsx, React } from "jimu-core";
 import { useInfiniteQuery } from 'react-query';
@@ -77,7 +78,7 @@ async function queryList(graphClient, listUrl, relationshipListUrl, globalid) {
 // }
 
 function calcItemHeight(documents) {
-  return `${61.5 + (documents?.length > 0 ? documents?.length * 51 : 0)}px`;
+  return `${78 + (documents?.length > 0 ? documents?.length * 51 : 0)}px`;
 }
 
 function getDescription(document) {
@@ -98,11 +99,11 @@ function getLabel(document) {
   return label
 }
 
-
 function Item(props) {
   const [documents, setDocuments] = useState(props.documents);
   const [deleting, setDeleting] = useState(props.deleting)
 
+  // console.log(props)
   const flexboxStyle = {
     display: "flex",
     flexDirection: "row",
@@ -110,10 +111,6 @@ function Item(props) {
     alignItems: "center",
     marginRight: "10px"
   }
-
-  React.useEffect(() => {
-
-  })
 
   const confirmRemove = (doc) => () => {
     setDeleting(doc.fields.id)
@@ -162,33 +159,35 @@ function Item(props) {
                 />
               }
 
-              {props.deleteAccess === true && deleting != document.fields.id ?
-                <CalciteButton
-                  slot="actions-end"
-                  color="neutral"
-                  appearance="transparent"
-                  iconEnd="trash"
-                  title="Delete document"
-                  scale="s"
-                  onClick={confirmRemove(document)}
-                />
-                :
-                <div slot="actions-end">
+              {props.deleteAccess === true ?
+                deleting != document.fields.id ?
                   <CalciteButton
-                    title="Yes"
-                    className="px-1"
-                    onClick={remove(document)}
-                  >
-                    Yes
-                  </CalciteButton>
-                  <CalciteButton
-                    title="No"
-                    className="px-1"
-                    onClick={() => setDeleting(null)}
-                  >
-                    No
-                  </CalciteButton>
-                </div>
+                    slot="actions-end"
+                    color="neutral"
+                    appearance="transparent"
+                    iconEnd="trash"
+                    title="Delete document"
+                    scale="s"
+                    onClick={confirmRemove(document)}
+                  />
+                  :
+                  <div slot="actions-end">
+                    <CalciteButton
+                      title="Yes"
+                      className="px-1"
+                      onClick={remove(document)}
+                    >
+                      Yes
+                    </CalciteButton>
+                    <CalciteButton
+                      title="No"
+                      className="px-1"
+                      onClick={() => setDeleting(null)}
+                    >
+                      No
+                    </CalciteButton>
+                  </div>
+                : null
               }
             </CalciteListItem>
           )}
@@ -200,6 +199,7 @@ function Item(props) {
 export default function VirtualScroll(props: AllWidgetProps) {
   const [documents, setDocuments] = useState({});
   const [documentCount, setDocumentCount] = useState(0);
+  const [filteredDocuments, setFilteredDocuments] = useState({})
 
   const {
     data,
@@ -233,7 +233,6 @@ export default function VirtualScroll(props: AllWidgetProps) {
     }
   )
   const pageData = data ? data.pages.flat(1).map(p => p.data).flat(1) : []
-  // console.log(pageData)
   const parentRef = React.useRef()
 
   const rowVirtualizer = useVirtual({
@@ -242,14 +241,11 @@ export default function VirtualScroll(props: AllWidgetProps) {
     // estimateSize: React.useCallback(() => 50, []),
   });
 
-
   React.useEffect(() => {
     if (props.sessionUploads.length > 0) {
       props.sessionUploads.forEach(upload => {
         let c = 0;
         pageData.forEach(p => {
-          console.log(p)
-          console.log(upload)
           if (upload.recordId === p.UNIQUE_ID) {
             if (!documents[p.UNIQUE_ID].includes(upload.document)) {
               documents[p.UNIQUE_ID].push(upload.document)
@@ -262,6 +258,23 @@ export default function VirtualScroll(props: AllWidgetProps) {
       })
     }
   }, [props.sessionUploads])
+
+  React.useEffect(() => {
+    if (props.searchText && props.searchText != '') {
+      let newDocuments = {}
+      Object.keys(documents).forEach((key) => {
+        newDocuments[key] = documents[key].filter((doc) => {
+          let fileName = doc.fields.LinkFilename.toLowerCase()
+          let searchText = props.searchText.toLowerCase()
+          return fileName.includes(searchText)
+        })
+      })
+      console.log(newDocuments)
+      setFilteredDocuments(newDocuments)
+    } else {
+      setFilteredDocuments(documents)
+    }
+  }, [props.searchText])
 
 
   React.useEffect(() => {
@@ -284,8 +297,10 @@ export default function VirtualScroll(props: AllWidgetProps) {
     pageData.length,
     isFetching,
     rowVirtualizer.virtualItems,
-    documentCount
+    documentCount,
+    props.searchText
   ]);
+
   return <div
     ref={parentRef}
     className="List"
@@ -308,9 +323,18 @@ export default function VirtualScroll(props: AllWidgetProps) {
         const isLoaderRow = virtualRow.index > pageData.length - 1;
         const item = pageData[virtualRow.index];
         let itemDocuments = []
-        if (documents && item && item.UNIQUE_ID && documents.hasOwnProperty(item.UNIQUE_ID)) {
-          itemDocuments = documents[item.UNIQUE_ID]
+        if (filteredDocuments && item && item.UNIQUE_ID && filteredDocuments.hasOwnProperty(item.UNIQUE_ID)) {
+          itemDocuments = filteredDocuments[item.UNIQUE_ID]
+          // if (props.searchText && props.searchText != '') {
+          //   itemDocuments = (itemDocuments.filter((doc) => {
+          //   // console.log(documents.filter((doc) => {
+          //     let fileName = doc.fields.LinkFilename.toLowerCase()
+          //     let searchText = props.searchText.toLowerCase()
+          //     return fileName.includes(searchText)
+          //   }))
+          // }
         }
+        // console.log('test')
 
         return (
           <div
@@ -327,11 +351,19 @@ export default function VirtualScroll(props: AllWidgetProps) {
             }}
           >
             {isLoaderRow ? hasNextPage ? <Loading type='SECONDARY' /> : 'Done' :
-              <Item item={item} documents={itemDocuments} graphClient={props.graphClient}
-                relationshipListUrl={props.relationshipListUrl} deleteAccess={props.deleteAccess} deleting={null}></Item>}
+              <Item
+                item={item}
+                documents={itemDocuments}
+                graphClient={props.graphClient}
+                relationshipListUrl={props.relationshipListUrl}
+                deleteAccess={props.deleteAccess}
+                searchText={props.searchText}
+                deleting={null}
+              />}
           </div>
         )
       })}
+      {/* {rowVirtualizer.measure()} */}
     </div>
   </div>
 };
