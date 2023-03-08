@@ -1,0 +1,15 @@
+{
+  "name": "sharepoint-documents-v2",
+  "label": "Documents v2",
+  "type": "widget",
+  "version": "2.0.0",
+  "exbVersion": "1.10.0",
+  "author": "Innovate, Inc.!",
+  "description": "This is used to interface with Sharepoint resources.",
+  "copyright": "",
+  "license": "http://www.apache.org/licenses/LICENSE-2.0",
+  "properties": {},
+  "translatedLocales": [
+    "en"
+  ]
+}
