@@ -23,7 +23,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
             jimuMapView: null,
             portal: null,
             // agol: null,
-            scope: 'My Organization',
+            scope: 'ArcGIS Online',
             groups: null,
             selGroup: null,
             folders: null,
@@ -197,10 +197,11 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
                         </NavItem>
                     </Nav>
                 </Navbar>
-                <Navbar borderBottom={true}>
+                {scopes.length > 1 || this.state.scope === 'My Groups' || (this.state.scope === 'My Content' && this.state.folders.length > 0) ? <Navbar borderBottom={true}>
                     <Nav>
-                        <NavItem>
+                        {scopes.length > 1 ? <NavItem>
                             <Select
+                                style={{ width: 200 }}
                                 defaultValue={this.state.scope}
                                 onChange={evt => {
                                     this.setState({
@@ -215,7 +216,8 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
                                     <Option value={scope}>{scope}</Option>
                                 ))}
                             </Select>
-                        </NavItem>
+                            
+                        </NavItem> : null }
                         {this.state.scope === 'My Groups' ? (
                             <NavItem>
                                 <Select
@@ -260,7 +262,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
                             </NavItem>
                         ) : null}
                     </Nav>
-                </Navbar>
+                </Navbar> : null}
                 <Navbar
                     borderBottom={true}>
                     <Nav>
