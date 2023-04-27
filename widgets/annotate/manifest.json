@@ -1,0 +1,23 @@
+{
+  "name": "annotate",
+  "label": "Annotate",
+  "type": "widget",
+  "version": "1.10.0",
+  "exbVersion": "1.10.0",
+  "author": "Innovate, Inc.!",
+  "description": "Custom annotation functionality.",
+  "copyright": "",
+  "license": "http://www.apache.org/licenses/LICENSE-2.0",
+  "publishMessages": [
+  ],
+  "messageActions": [],
+  "defaultSize": {
+    "width": 360,
+    "height": 80
+  },
+  "properties": {},
+  "translatedLocales": [
+    "en"
+  ],
+  "dependency": "jimu-arcgis"
+}
