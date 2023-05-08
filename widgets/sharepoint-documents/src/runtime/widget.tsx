@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import {
   React,
   utils,
@@ -8,18 +10,18 @@ import {
   IMDataSourceInfo,
   ExpressionResolverComponent,
 } from 'jimu-core'
-import Query from 'esri/tasks/support/Query'
-import {Client, FileUpload, LargeFileUploadTask} from '@microsoft/microsoft-graph-client'
-import {InteractionType, PublicClientApplication} from '@azure/msal-browser'
+import { Client, FileUpload, LargeFileUploadTask } from '@microsoft/microsoft-graph-client'
+import { InteractionType, PublicClientApplication } from '@azure/msal-browser'
 import {
   AuthCodeMSALBrowserAuthenticationProvider,
   AuthCodeMSALBrowserAuthenticationProviderOptions
 } from '@microsoft/microsoft-graph-client/authProviders/authCodeMsalBrowser'
-import {ListItem} from './listItem'
-import {v4 as uuidv4} from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import VirtualScroll from './virtualScroll';
-import {QueryClient, QueryClientProvider} from 'react-query';
-import {Loading} from 'jimu-ui';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { Loading, Row, Col } from 'jimu-ui';
+import { CalcitePanel, CalciteInput, CalciteButton } from 'calcite-components'
+
 
 interface State {
   profile: any,
@@ -34,7 +36,9 @@ interface State {
   permissions: {},
   listUrl: string,
   relationshipListUrl: string,
-  driveItemRootUrl: string
+  driveItemRootUrl: string,
+  sessionUploads: any[],
+  searchText: string
 }
 
 export default class Widget extends React.PureComponent<AllWidgetProps<unknown>, State> {
@@ -46,11 +50,13 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
     selectionId: null,
     initialized: false,
     account: null,
-    permissions: null
+    permissions: null,
+    sessionUploads: [],
+    searchText: ''
   }
   msalInstance;
   graphClient;
-  loginRequest = {scopes: ['user.read', 'profile', 'Sites.Read.All', 'Sites.ReadWrite.All']};
+  loginRequest = { scopes: ['user.read', 'profile', 'Sites.Read.All', 'Sites.ReadWrite.All'] };
   profile;
   account;
 
@@ -80,15 +86,14 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
     })
   }
   componentDidUpdate(prevProps: AllWidgetProps<unknown>) {
-    console.log('componentDidUpdate');
     if (this.props.stateProps?.selectionId !== undefined && this.props.stateProps.selectionId !== this.state.selectionId) {
       this.setState({
         selectedObjects: this.props.stateProps.selectedObjects.map(o => {
 
           o.LABEL = this.flatDataSources[o.DATASOURCE_ID].expression
             ? this.renderExpression(
-            this.flatDataSources[o.DATASOURCE_ID].expression.parts,
-            o.attributes) : o.attributes[o.DEFAULT_LABEL_FIELD]
+              this.flatDataSources[o.DATASOURCE_ID].expression.parts,
+              o.attributes) : o.attributes[o.DEFAULT_LABEL_FIELD]
 
           return o
         }),
@@ -97,22 +102,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
     }
   }
 
-  // shouldComponentUpdate(nextProps, nextState) {
-  //   console.log('shouldComponentUpdate')
-  //   // console.log(nextProps, nextState);
-  //   // if (this.props.state === 'CLOSED' && nextProps.state !== 'CLOSED') {
-  //   //   return true;
-  //   // }
-  //   // return this.state.globalIds !== nextState.globalIds;
-  //   // this doesn't work in list view as window... is it still needed b/c of changes to virtual scroll component?
-  //   // if (this.props.stateProps) {
-  //   //   return this.props.stateProps?.selectionId !== nextProps.stateProps?.selectionId
-  //   // }
-  //   return true;
-  // }
-
   componentDidMount() {
-    console.log('componentDidMount')
     this.props.useDataSources.forEach(ds => {
       this.flatDataSources[ds.dataSourceId] = ds
       if (ds.expression) {
@@ -120,7 +110,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
       }
     })
     this.initMsal().then(() => {
-      this.setState({initialized: true});
+      this.setState({ initialized: true });
     })
     if (this.props.config.siteId && this.props.config.listId) {
       this.setState({
@@ -132,6 +122,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
         relationshipListUrl: `/sites/${this.props.config.siteId}/lists/${this.props.config.relationshipListId}`
       })
     }
+    // console.log(this.props.config)
     if (this.props.config.siteId && this.props.config.driveId && this.props.config.driveItemRootId) {
       this.setState({
         driveItemRootUrl: `/sites/${this.props.config.siteId}/drives/${this.props.config.driveId}/items`
@@ -150,7 +141,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
       results.value.forEach((v) => {
         // field names for Jamestown Sharepoint site. Innovate site uses First and Title
         if (v.fields.Title === userName) {
-          if (v.fields.PermissionGroup === 'Site Owner') {
+          if (v.fields.PermissionGroup === 'Site Owners') {
             readPerms = true;
             writePerms = true;
             deletePerms = true;
@@ -166,7 +157,8 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
         }
       });
     })
-    this.setState({permissions: {
+    this.setState({
+      permissions: {
         read: readPerms,
         write: writePerms,
         delete: deletePerms
@@ -182,23 +174,12 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
     try {
       account = await this.msalLogin()
     } catch {
-      account = await this.getMsalConcent()
+      account = await this.getMsalConsent()
     }
-    this.setState({account: account});
+    this.setState({ account: account });
     this.initGraphClient(account);
-    console.log(this.state.account);
     await this.getUserPermissions(this.state.account.name, this.props.config.permissionsListId);
   }
-
-  // isDsConfigured = () => {
-  //   if (this.props.useDataSources &&
-  //     this.props.useDataSources.length === 1 &&
-  //     this.props.useDataSources[0].fields &&
-  //     this.props.useDataSources[0].fields.length === 1) {
-  //     return true;
-  //   }
-  //   return false;
-  // }
 
   setMsalConfig() {
     const msalConfig = {
@@ -217,11 +198,11 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
       scopes: this.loginRequest.scopes
     }
     const authProvider = new AuthCodeMSALBrowserAuthenticationProvider(this.msalInstance, options)
-    this.graphClient = Client.initWithMiddleware({authProvider});
+    this.graphClient = Client.initWithMiddleware({ authProvider });
     return this.graphClient;
   }
 
-  async getMsalConcent() {
+  async getMsalConsent() {
     console.log('failed.. getting consent')
     const response = await this.msalInstance.loginPopup(this.loginRequest)
     console.log('consent complete')
@@ -236,31 +217,12 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
     })
   }
 
-  //
-  // async setMsalToken () {
-  //   const tokenResponse = await this.msalInstance.acquireTokenSilent(this.loginRequest)
-  //   this.setState({ msalToken: tokenResponse.accessToken })
-  // }
-
-  // for testing
-  // getUserProfile = (e) => {
-  //     // fetch('https://graph.microsoft.com/v1.0/me', {
-  //     //     headers: {
-  //     //         Authorization: `Bearer ${this.state.msalToken}`
-  //     //     }
-  //     // }).then(r => r.json()).then(profile => {
-  //     //     this.setState({profile});
-  //     // });
-  //     this.graphClient.api('me').get().then(profile => this.setState({profile}))
-  // }
-
-
   uploadFile(file) {
     if (file.size > 4 * 1024 * 1024) {
       return this.multipartUpload(file)
     } else {
       return this.graphClient
-        .api(`${this.props.driveItemRootUrl}/${this.props.config.driveItemRootId}:/${uuidv4()}/${file.name}:/content`)
+        .api(`${this.state.driveItemRootUrl}/${this.props.config.driveItemRootId}:/${uuidv4()}/${file.name}:/content`)
         .put(file)
     }
   }
@@ -269,7 +231,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
   async multipartUpload(file) {
     const session = await LargeFileUploadTask.createUploadSession(
       this.graphClient,
-      `${this.props.driveItemRootUrl}/${this.props.config.driveItemRootId}:/${uuidv4()}/${file.name}:/createUploadSession`);
+      `${this.state.driveItemRootUrl}/${this.props.config.driveItemRootId}:/${uuidv4()}/${file.name}:/createUploadSession`);
 
     const f = new FileUpload(
       file,
@@ -285,20 +247,26 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
     const file = e.target.files[0]
     const driveItem = await this.uploadFile(file)
     const newListItem = await this.getDriveItemListItem(driveItem)
-    this.createRelationshipListItems(newListItem.id);
-    this.setState({newListItem});
+    this.createRelationshipListItems(newListItem);
+    this.setState({ newListItem });
     e.target.value = null
   }
 
   getDriveItemListItem(driveItem) {
-    return this.graphClient.api(`${this.props.driveItemRootUrl}/${driveItem.id}/listItem`).get()
+    return this.graphClient.api(`${this.state.driveItemRootUrl}/${driveItem.id}/listItem`).get()
   }
 
-  createRelationshipListItems(DocumentFKLookupId) {
+  createRelationshipListItems(newListItem) {
+    const DocumentFKLookupId = newListItem.id
+    let newSessionUploads = []
     this.state.selectedObjects.forEach(i => {
-      // const itemId = this.re.exec()[1];
       const RecordFK = i.UNIQUE_ID;
-      return this.graphClient.api(`${this.props.relationshipListUrl}/items`).post(
+      let upload = {
+        recordId: RecordFK,
+        document: newListItem
+      }
+      newSessionUploads.push(upload)
+      return this.graphClient.api(`${this.state.relationshipListUrl}/items`).post(
         {
           fields: {
             RecordFK,
@@ -307,69 +275,110 @@ export default class Widget extends React.PureComponent<AllWidgetProps<unknown>,
         }
       )
     })
+    this.setState({
+      sessionUploads: this.state.sessionUploads.concat(newSessionUploads)
+    })
+  }
+
+  updateSearchInput(evt) {
+    let value = ''
+    if (evt.target && evt.target.parentElement && evt.target.parentElement.value) {
+      value = evt.target.parentElement.value
+    }
+    return value;
   }
 
 
   render() {
-    // if (!this.isDsConfigured()) {
-    //   return <h3>
-    //     Please config data source.
-    //   </h3>;
-    // }
+    // console.log(this.state)
     if (!this.state.initialized) {
-      return <Loading type='SECONDARY'/>
+      return <Loading type='SECONDARY' />
     }
 
     return <QueryClientProvider client={this.queryClient} contextSharing={true}>
-      <div className="widget-subscribe" style={{
-        maxHeight: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        height: '100%',
-        backgroundColor: 'white'
-      }}>
-        {/*<div style={{*/}
-        {/*  height: '100%',*/}
-        {/*  overflowY: 'auto',*/}
-        {/*  overflowX: 'hidden'*/}
-        {/*}}>*/}
-        {this.state.selectedObjects.length === 0
-
-          ? <h5>Click on item see related documents</h5>
-          : <h5>Currently viewing documents for {this.state.selectedObjects.length} sites.</h5>}
-
+      <CalcitePanel
+        style={{
+          height: '100%',
+          maxHeight: '100%',
+        }}
+        heading='Parcel Document Management'
+      >
+        <div className="m-2">
+          {this.state.permissions.read === true ? 
+            "Select a feature on the map or in the table to view documents related to that feature. You can also filter by file name." :
+            "You do not currently have access the sharepoint document library. Please contact your sharepoint administrator"
+          }
+        </div>
+        
+        {this.state.permissions.read === true ? 
+          <div>
+            <Row className="m-2 p-0">
+              <Col className="col-12 m-0 p-0">
+                <CalciteInput placeholder="Filter by file name" type="search">
+                  <CalciteButton
+                    slot="action"
+                    title="Search"
+                    className="px-2"
+                    onClick={(evt) => {
+                      let value = this.updateSearchInput(evt)
+                      this.setState({
+                        searchText: value
+                      })
+                    }}
+                  >
+                    Search
+                  </CalciteButton>
+                </CalciteInput>
+              </Col>
+              {/* <Col className="col-4 m-0 p-0">
+                <CalciteButton
+                  title="Search"
+                  className="px-2"
+                  // onClick={remove(document)}
+                >
+                  Search
+                </CalciteButton>
+              </Col> */}
+            </Row>
+            {this.state.selectedObjects.length > 0 ?
+              <Row className="m-2 p-0">
+                {`Currently viewing documents for ${this.state.selectedObjects.length} sites.`}
+              </Row>
+              : null
+            }
+          </div>
+          : null
+        }
         {this.state.permissions.read === true
           ? this.state.selectedObjects.length > 0
             ? <VirtualScroll graphClient={this.graphClient} listUrl={this.state.listUrl}
-                               relationshipListUrl={this.state.relationshipListUrl}
-                               selectedObjects={this.state.selectedObjects}
-                              selectionId={this.state.selectionId}
-                               addedItem={this.state.newListItem}
-                                deleteAccess={this.state.permissions.delete}></VirtualScroll>
-              : null
-          : <p>You do not currently have access the sharepoint document library. Please contact your sharepoint administrator</p>}
-
-        {/*{this.state.selectedObjects.length > 0*/}
-        {/*  ? <VirtualScroll graphClient={this.graphClient} listUrl={this.props.listUrl}*/}
-        {/*                     relationshipListUrl={this.props.relationshipListUrl}*/}
-        {/*                     selectedObjects={this.state.selectedObjects}*/}
-        {/*                    selectionId={this.state.selectionId}*/}
-        {/*                     addedItem={this.state.newListItem}></VirtualScroll>*/}
-        {/*    : null}*/}
-
-        {this.state.permissions.write === true
-          ? this.state.selectedObjects.length > 0
-            ? <div>
-              <hr></hr>
-              Select a file to upload to the selected site(s).<br/>
-              <input style={{minHeight: '26px'}} type="file" onChange={this.fileInputChanged}/>
-            </div>
+              relationshipListUrl={this.state.relationshipListUrl}
+              selectedObjects={this.state.selectedObjects}
+              selectionId={this.state.selectionId}
+              // addedItem={this.state.newListItem}
+              sessionUploads={this.state.sessionUploads}
+              deleteAccess={this.state.permissions.delete}
+              searchText={this.state.searchText}
+            />
             : null
-            : <p>Write access required to upload documents</p>}
-        {/*</div>*/}
-      </div>
+          : null
+        }
 
+        <div slot="footer" style={{
+          width: "100%"
+        }}>
+          {this.state.permissions.write === true
+            ? this.state.selectedObjects.length > 0
+              ?
+                <div>
+                  Select a file to upload to the selected site(s).<br />
+                  <input style={{ minHeight: '26px' }} type="file" onChange={this.fileInputChanged} />
+                </div>
+              : null
+            : 'Write access required to upload documents.'
+          }
+        </div>
+      </CalcitePanel>
     </QueryClientProvider>
   }
 }
