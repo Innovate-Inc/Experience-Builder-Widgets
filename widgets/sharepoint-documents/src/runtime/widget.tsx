@@ -1,5 +1,5 @@
 import { React, AllWidgetProps, DataSourceComponent, DataSourceManager, SessionManager, getAppStore } from "jimu-core";
-import { Navbar, Nav, NavItem, Button, Container, Row } from "jimu-ui";
+import { Navbar, Nav, NavItem, ButtonGroup, Button, Container, Row, Tab, Tabs } from "jimu-ui";
 import { AddPageOutlined } from 'jimu-icons/outlined/editor/add-page'
 import { RightOutlined } from 'jimu-icons/outlined/directional/right'
 import initMsal from "./utils"
@@ -47,7 +47,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
 
 	static getDerivedStateFromProps(props) {
         return {
-            useDataSources: props.useDataSources
+            useDataSources: props.config.useDataSources
         }
     }
 
@@ -237,7 +237,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
 						const useDataSource = useDataSources[i]
 						const dataSource = dsm.getDataSource(ds.dataSourceId)
 						useDataSource.dataSource = dataSource
-						if (dataSource.type === "FEATURE_LAYER") {
+						if (dataSource && dataSource.type === "FEATURE_LAYER" && uniqueFKs.length > 0) {
 							let query = {
 								where: `GlobalID IN ('${uniqueFKs.join("', '")}')`,
 								outFields: "*"
@@ -311,22 +311,26 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
 				{this.state.permissions.read ?
 					<Container className="d-flex flex-column m-0 p-3 flex-grow-1 overflow-hidden">
 						<Row className="m-0 p-0">
-							<h3>
-								{this.state.searchAllDocuments ? "Search All Documents" : "Documents by Feature"}
-							</h3>
-							<Button
-								type="link"
-								onClick={() => {
-									this.setState({ searchAllDocuments: !this.state.searchAllDocuments })
-								}}
-							>
-								<span>
-									{this.state.searchAllDocuments ? "Documents by Feature" : "Search All Documents"}
-								</span>
-								<RightOutlined
-									className="mr-0 ml-1"
-								/>
-							</Button>
+							<ButtonGroup size="default" className="flex-grow-1">
+								<Button
+									type={this.state.searchAllDocuments ? "secondary" : "primary"}
+									className={`${this.state.searchAllDocuments ? null : "text-white"} flex-grow-1`}
+									onClick={() => {
+										this.setState({ searchAllDocuments: false })
+									}}
+								>
+									Documents by Feature
+								</Button>
+								<Button
+									type={this.state.searchAllDocuments ? "primary" : "secondary"}
+									className={`${this.state.searchAllDocuments ? "text-white" : null} flex-grow-1`}
+									onClick={() => {
+										this.setState({ searchAllDocuments: true })
+									}}
+								>
+									Search All Documents
+								</Button>
+							</ButtonGroup>
 						</Row>
 						{this.state.permissions.write ?
 							<Row className="m-0 p-0 py-3">
@@ -347,7 +351,12 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
 								creatorList={this.state.creatorList}
 							/>
 						:
-							<Row className="m-0 p-0 pb-3 sharepoint-widget__descriptive-text font-weight-bold">
+							<Row
+								className="m-0 p-0 pb-3 font-weight-bold"
+								style={{
+                                    fontSize: "14px"
+                                }}
+							>
 								{this.getFeatureFks().length} feature{this.getFeatureFks().length === 1 ? null : "s"} selected {this.getFeatureFks().length > 0 ?
 									<Button
 										className="py-0"
@@ -362,6 +371,17 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
 								: null}
 							</Row>
 						}
+													
+						{!this.state.searchAllDocuments && this.getFeatureFks().length >= 100 ?
+							<Row
+								className="m-0 p-0 pb-3 font-italic"
+								style={{
+                                    fontSize: "14px"
+                                }}
+							>
+								Note: A maximum of 100 records per feature layer can be selected using the map. Selecting an area that includes more than 100 records per feature layer will exclude some records from the results.
+							</Row>
+						: null}
 						<Row id="result-container" className="p-0 m-0 flex-fill overflow-hidden bg-white">
 							<Container className="m-0 px-3 border border-light-900 overflow-auto h-100">
 								{this.state.searchAllDocuments && this.state.documents ?
@@ -375,7 +395,12 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
 									/>
 								: !this.state.searchAllDocuments ? 
 									this.getFeatureFks().length === 0 ?
-										<div className="pt-3 sharepoint-widget__descriptive-text">
+										<div
+											className="pt-3"
+											style={{
+												fontSize: "14px"
+											}}
+										>
 											Using the map or table, select one or more features to view documents related to those sites.
 										</div>
 									: this.state.useDataSources.map((ds) =>
@@ -408,7 +433,12 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
 					</Container>
 				:
 					<Container className="d-flex flex-column m-0 p-3 flex-grow-1 overflow-hidden">
-						<Row className="sharepoint-widget__descriptive-text font-weight-bold p-0 m-0">
+						<Row
+							className="font-weight-bold p-0 m-0"
+							style={{
+								fontSize: "14px"
+							}}
+						>
 							You do not have sufficient SharePoint permissions to use this tool. Please contact your SharePoint administrator.
 						</Row>
 					</Container>

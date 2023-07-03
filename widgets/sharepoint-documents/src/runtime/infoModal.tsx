@@ -135,10 +135,22 @@ export default class InfoModal extends React.PureComponent<Props, any> {
                 </ModalHeader>
                 <ModalBody>
                     {this.state.updateInProgress ?
-                        <div className="sharepoint-widget__loading-container">
-                        <span className="sharepoint-widget__descriptive-text">Updating {doc.LinkFilename}...</span>
-                        <Loading type="DONUT" />
-                    </div>
+                        <div
+                            style={{
+                                height: "50px",
+                                position: "relative",
+                                width: "100%"
+                            }}
+                        >
+                            <span
+                                style={{
+                                    fontSize: "14px"
+                                }}
+                            >
+                                Updating {doc.LinkFilename}...
+                            </span>
+                            <Loading type="DONUT" />
+                        </div>
                     : this.state.editInProgress ?
                         <DocumentInfoForm
                             documentTags={this.props.documentTags}
@@ -153,14 +165,29 @@ export default class InfoModal extends React.PureComponent<Props, any> {
                             <div className="d-flex flex-row">
                                 <h5>{doc.fields.Title ? doc.fields.Title : doc.fields.LinkFilename}</h5>
                             </div>
-                            {doc.fields.DocumentDescription ? <div className="d-flex flex-row mt-2 pb-4 mb-4 border-bottom border-light-900 sharepoint-widget__descriptive-text">
-                                {doc.fields.DocumentDescription}
-                            </div> : null}
+                            {doc.fields.DocumentDescription ?
+                                <div
+                                    className="d-flex flex-row mt-2 pb-4 mb-4 border-bottom border-light-900"
+                                    style={{
+                                        fontSize: "14px"
+                                    }}
+                                >
+                                    {doc.fields.DocumentDescription}
+                                </div>
+                            : null}
                             {doc.fields.Title ? <div>{doc.fields.LinkFilename}</div> : null}
                             <div className="mt-1">{this.getMetaData(doc)}</div>
                             <div className="d-flex flex-wrap mt-1">
                                 {doc.fields.Tags ? doc.fields.Tags.map((t) =>
-                                    <div className="sharepoint-widget__badge">
+                                    <div
+                                        style={{
+                                            borderRadius: "10px",
+                                            margin: "5px 5px 5px 0px",
+                                            padding: "5px 10px",
+                                            background: "#D0544E",
+                                            color: "#FFFFFD"
+                                        }}
+                                    >
                                         {t}
                                     </div>
                                 ) : null}

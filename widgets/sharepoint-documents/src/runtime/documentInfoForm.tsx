@@ -53,7 +53,13 @@ export default class DocumentInfoForm extends React.PureComponent<Props, any> {
                         onChange={e => this.props.updateDocumentInfo({file: e.target.files[0]})}
                     />
                 : null}
-                <Label className="sharepoint-widget__label mt-0">
+                <Label
+                    className="mt-0"
+                    style={{
+                        fontSize: "16px",
+                        fontWeight: "500"
+                    }}
+                >
                     Title
                 </Label>
                 <TextInput
@@ -63,11 +69,19 @@ export default class DocumentInfoForm extends React.PureComponent<Props, any> {
                     defaultValue={this.props.documentTitle}
                     onChange={e => this.props.updateDocumentInfo({ documentTitle: e.target.value })}
                 />
-                <Label className="sharepoint-widget__label mt-4">
+                <Label
+                    className="mt-4"
+                    style={{
+                        fontSize: "16px",
+                        fontWeight: "500"
+                    }}
+                >
                     Description
                 </Label>
                 <TextArea
-                    className="sharepoint-widget__text-area"
+                    style={{
+                        resize: "none"
+                    }}
                     placeholder="Enter a description for the document"
                     height={100}
                     maxLength={255}
@@ -81,7 +95,13 @@ export default class DocumentInfoForm extends React.PureComponent<Props, any> {
                 <Row className="mx-0 mt-1">
                     Remaining characters: {this.state.documentDescription ? 255 - this.state.documentDescription.length : 255}
                 </Row>
-                <Label className="sharepoint-widget__label mt-4">
+                <Label
+                    className="mt-4"
+                    style={{
+                        fontSize: "16px",
+                        fontWeight: "500"
+                    }}
+                >
                     Tags
                 </Label>
                 <AdvancedSelect
@@ -97,11 +117,22 @@ export default class DocumentInfoForm extends React.PureComponent<Props, any> {
                 {this.props.selectedTags ?
                     <div className="d-flex flex-wrap mt-2">
                         {this.props.selectedTags.map((t) =>
-                            <div className="sharepoint-widget__badge">
+                            <div
+                                style={{
+                                    borderRadius: "10px",
+                                    margin: "5px 5px 5px 0px",
+                                    padding: "5px 10px",
+                                    background: "#D0544E",
+                                    color: "#FFFFFD"
+                                }}
+                            >
                                 {t.value}
                                 <CloseOutlined
-                                    className="ml-2 p-0 sharepoint-widget__badge__close-link"
+                                    className="ml-2 p-0"
                                     size={11}
+                                    style={{
+                                        cursor: "pointer"
+                                    }}
                                     onClick={() => this.deselectTag(t)}
                                 />
                             </div>

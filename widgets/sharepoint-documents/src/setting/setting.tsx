@@ -15,9 +15,9 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
     }
 
     static getDerivedStateFromProps(props, state) {
-        if (props.useDataSources !== state.useDataSources) {
+        if (props.config.useDataSources !== state.useDataSources) {
             return {
-                useDataSources: props.useDataSources
+                useDataSources: props.config.useDataSources
             }
         }
         return null
@@ -27,21 +27,25 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
     expressionTypes = Immutable([ExpressionBuilderType.Attribute, ExpressionBuilderType.Expression])
 
     onSelectDataSource = (useDataSources: UseDataSource[]) => {
+        let config = {...this.props.config}
+        config.useDataSources = useDataSources
         this.props.onSettingChange({
             id: this.props.id,
-            useDataSources: useDataSources
+            config: config
         });
     }
 
     onFieldChange = (allSelectedFields: IMFieldSchema[], ds) => {
-        const useDataSource = this.props.useDataSources.find(d => d.dataSourceId === ds.id)
+        const useDataSource = this.props.config.useDataSources.find(d => d.dataSourceId === ds.id)
         const updatedDataSource: UseDataSource = {...useDataSource, fields: allSelectedFields.map(f => f.jimuName)}
-        let index = this.props.useDataSources.findIndex(d => d.dataSourceId === ds.id)
-        const useDataSources = [...this.props.useDataSources]
+        let index = this.props.config.useDataSources.findIndex(d => d.dataSourceId === ds.id)
+        const useDataSources = [...this.props.config.useDataSources]
         useDataSources[index] = updatedDataSource
+        let config = {...this.props.config}
+        config.useDataSources = useDataSources
         this.props.onSettingChange({
             id: this.props.id,
-            useDataSources: useDataSources
+            config: config
         })
     }
 
@@ -57,16 +61,18 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
 
     updateDataSourceExpression = (exp) => {
         const dsId = this.state.selectedDataSource.dataSourceId
-        const useDataSource = this.props.useDataSources.find(d => d.dataSourceId === dsId)
-        let index = this.props.useDataSources.findIndex(d => d.dataSourceId === dsId)
+        const useDataSource = this.props.config.useDataSources.find(d => d.dataSourceId === dsId)
+        let index = this.props.config.useDataSources.findIndex(d => d.dataSourceId === dsId)
 
         const updatedDataSource: UseDataSource = {...useDataSource}
         updatedDataSource["expression"] = exp
-        const useDataSources = [...this.props.useDataSources]
+        const useDataSources = [...this.props.config.useDataSources]
         useDataSources[index] = updatedDataSource
+        let config = {...this.props.config}
+        config.useDataSources = useDataSources
         this.props.onSettingChange({
             id: this.props.id,
-            useDataSources: useDataSources
+            config: config
         })
         this.setState({
             selectedDataSource: updatedDataSource
@@ -115,8 +121,8 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
                             useDataSources={this.state.useDataSources}
                             onChange={this.onSelectDataSource}
                             widgetId={this.props.id}
-                            isMultiple={true}
-                            mustUseDataSource={true}
+                            isMultiple
+                            mustUseDataSource
                         />
                     </SettingRow>
                 </SettingCollapse>

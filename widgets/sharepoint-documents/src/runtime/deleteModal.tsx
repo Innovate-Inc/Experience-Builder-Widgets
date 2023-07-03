@@ -58,7 +58,13 @@ export default class DeleteModal extends React.PureComponent<Props, any> {
                 </ModalHeader>
                 <ModalBody>
                     {this.state.deletionInProgress ?
-                        <div className="sharepoint-widget__loading-container">
+                        <div
+                            style={{
+                                height: "50px",
+                                position: "relative",
+                                width: "100%"
+                            }}
+                        >
                             Deleting {doc.fields.LinkFilename}...
                             <Loading type="DONUT" />
                         </div> :
@@ -83,19 +89,38 @@ export default class DeleteModal extends React.PureComponent<Props, any> {
                                     </Button>
                                 </Tooltip>
                             </div>
-                            {doc.fields.DocumentDescription ? <div className="d-flex flex-row mt-2 pb-4 mb-4 border-bottom border-light-900 sharepoint-widget__descriptive-text">
+                            {doc.fields.DocumentDescription ?
+                                <div
+                                    className="d-flex flex-row mt-2 pb-4 mb-4 border-bottom border-light-900"
+                                    style={{
+                                        fontSize: "14px"
+                                    }}
+                                >
                                     {doc.fields.DocumentDescription}
                                 </div> : null}
                             {doc.fields.Title ? <div>{doc.fields.LinkFilename}</div> : null}
                             <div>{this.getMetaData(doc)}</div>
                             <div className="d-flex flex-wrap">
                                 {doc.fields.Tags ? doc.fields.Tags.map((t) => 
-                                    <div className="sharepoint-widget__badge">
+                                    <div
+                                        style={{
+                                            borderRadius: "10px",
+                                            margin: "5px 5px 5px 0px",
+                                            padding: "5px 10px",
+                                            background: "#D0544E",
+                                            color: "#FFFFFD"
+                                        }}
+                                    >
                                         {t}
                                     </div>
                                 ) : null}
                             </div>
-                            <div className="mt-2 font-weight-bold sharepoint-widget__descriptive-text">
+                            <div
+                                className="mt-2 font-weight-bold"
+                                style={{
+                                    fontSize: "14px"
+                                }}
+                            >
                                 {doc.fields.FeatureFKs && doc.fields.FeatureFKs.length > 1 ?
                                     `Note: This document is currently related to ${doc.fields.FeatureFKs.length} features. Deleting this document will remove those relationships.`
                                 : doc.fields.FeatureFKs && doc.fields.FeatureFKs.length === 1 ?

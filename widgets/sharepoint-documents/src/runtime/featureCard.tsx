@@ -131,7 +131,13 @@ export default class FeatureCard extends React.PureComponent<Props, any> {
                 </CardHeader>
                 <CardBody className={`${this.props.documents.length > 0 ? "py-0" : "py-3"}`}>
                     {this.props.loading ? 
-                        <div className="sharepoint-widget__loading-container">
+                        <div
+                            style={{
+                                height: "50px",
+                                position: "relative",
+                                width: "100%"
+                            }}
+                        >
                             <Loading type="DONUT" />
                         </div> :
                         this.props.documents.length > 0 ?

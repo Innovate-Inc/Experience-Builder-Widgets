@@ -121,7 +121,15 @@ export default class DocumentList extends React.PureComponent<Props, any> {
                         {d.fields.Tags ?
                             <div className="d-flex flex-wrap mt-1 w-100">
                                 {d.fields.Tags.map((t) => 
-                                    <div className="sharepoint-widget__badge">
+                                    <div
+                                        style={{
+                                            borderRadius: "10px",
+                                            margin: "5px 5px 5px 0px",
+                                            padding: "5px 10px",
+                                            background: "#D0544E",
+                                            color: "#FFFFFD"
+                                        }}
+                                    >
                                         {t}
                                     </div>
                                 )}

@@ -129,8 +129,20 @@ export default class UploadModal extends React.PureComponent<Props, any> {
                 </ModalHeader>
                 <ModalBody>
                     {this.state.uploadInProgress ?
-                        <div className="sharepoint-widget__loading-container">
-                            <span className="sharepoint-widget__descriptive-text">Uploading {this.state.file.name}...</span>
+                        <div
+                            style={{
+                                height: "50px",
+                                position: "relative",
+                                width: "100%"
+                            }}
+                        >
+                            <span
+                                style={{
+                                    fontSize: "14px"
+                                }}
+                            >
+                                Uploading {this.state.file.name}...
+                            </span>
                             <Loading type="DONUT" />
                         </div> :
                         <DocumentInfoForm
@@ -142,7 +154,12 @@ export default class UploadModal extends React.PureComponent<Props, any> {
                             upload={true}
                         />
                     }
-                    <div className="mt-4 sharepoint-widget__descriptive-text font-weight-bold">
+                    <div
+                        className="mt-4 font-weight-bold"
+                        style={{
+                            fontSize: "14px"
+                        }}
+                    >
                         {this.props.selectedFeatures && this.getFeatureFks().length > 0 ?
                             `This document will be attached to ${this.getFeatureFks().length} selected feature${this.getFeatureFks().length > 1 ? "s" : ""}.`    
                         :

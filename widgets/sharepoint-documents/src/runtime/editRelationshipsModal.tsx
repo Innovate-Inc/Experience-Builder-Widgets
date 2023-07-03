@@ -144,10 +144,22 @@ export default class EditRelationshipsModal extends React.PureComponent<Props, a
                             id="related"
                             title="Current related features"
                         >
-                            <div className="feature-selection-container p-3 border-bottom border-left border-right border-light-500">
+                            <div
+                                className="p-3 border-bottom border-left border-right border-light-500"
+                                style={{
+                                    maxHeight: "200px",
+                                    overflowY: "auto",
+                                    overflowX: "hidden"
+                                }}
+                            >
                                 {this.props.useDataSources && doc.fields.FeatureFKs ? this.props.useDataSources.map(ds =>
                                     this.getRelatedFeatures(ds).length > 0 ?
-                                        <div className="sharepoint-widget__descriptive-text pb-3">
+                                        <div
+                                            className="pb-3"
+                                            style={{
+                                                fontSize: "14px"
+                                            }}
+                                        >
                                             <div className="font-weight-bold pb-2">{ds.dataSource.layerDefinition.name}</div>
                                             <div>
                                                 {this.getRelatedFeatures(ds).map(f => 
@@ -174,10 +186,22 @@ export default class EditRelationshipsModal extends React.PureComponent<Props, a
                             id="selected"
                             title="Selected Features"
                         >
-                            <div className="feature-selection-container p-3 border-bottom border-left border-right border-light-500">
+                            <div
+                                className="p-3 border-bottom border-left border-right border-light-500"
+                                style={{
+                                    maxHeight: "200px",
+                                    overflowY: "auto",
+                                    overflowX: "hidden"
+                                }}
+                            >
                                 {this.props.useDataSources ? this.props.useDataSources.map(ds =>
                                     this.props.selectedFeatures[ds.dataSourceId] && this.props.selectedFeatures[ds.dataSourceId].length > 0 ?
-                                        <div className="sharepoint-widget__descriptive-text pb-3">
+                                        <div
+                                            className="pb-3"
+                                            style={{
+                                                fontSize: "14px"
+                                            }}
+                                        >
                                             <div className="font-weight-bold pb-2">{ds.dataSource.layerDefinition.name}</div>
                                             <div>
                                                 {this.props.selectedFeatures[ds.dataSourceId].map(f => 
@@ -201,7 +225,12 @@ export default class EditRelationshipsModal extends React.PureComponent<Props, a
                             </div>
                         </Tab>
                     </Tabs>
-                    <div className="my-2 font-weight-bold sharepoint-widget__descriptive-text">
+                    <div
+                        className="my-2 font-weight-bold"
+                        style={{
+                            fontSize: "14px"
+                        }}
+                    >
                         This document will be updated to be related to {this.state.inputFeatures.length === 1 ? "1 feature." : `${this.state.inputFeatures.length} features.`}
                     </div>
                 </ModalBody>

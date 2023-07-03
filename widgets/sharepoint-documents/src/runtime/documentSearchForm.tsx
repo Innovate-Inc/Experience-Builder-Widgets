@@ -89,7 +89,13 @@ export default class DocumentSearchForm extends React.PureComponent<Props, any> 
                         this.props.updateDocumentFilters(filters)
                     }}
                 />
-                <Label className="sharepoint-widget__label mt-4">
+                <Label
+                    className="mt-4"
+                    style={{
+                        fontSize: "16px",
+                        fontWeight: "500"
+                    }}
+                >
                     Uploaded Date Range
                 </Label>
                 <Row className="p-0 m-0">
@@ -108,7 +114,12 @@ export default class DocumentSearchForm extends React.PureComponent<Props, any> 
                             this.props.updateDocumentFilters(filters)
                         }}
                     />
-                    <span className="sharepoint-widget__descriptive-text align-self-center px-3">
+                    <span
+                        className="align-self-center px-3"
+                        style={{
+                            fontSize: "14px"
+                        }}
+                    >
                         to
                     </span>
                     <TextInput
@@ -131,7 +142,13 @@ export default class DocumentSearchForm extends React.PureComponent<Props, any> 
                 
                 <Row className="p-0 m-0">
                     <Col className="p-0 pr-2 m-0">
-                        <Label className="sharepoint-widget__label mt-4">
+                        <Label
+                            className="mt-4"
+                            style={{
+                                fontSize: "16px",
+                                fontWeight: "500"
+                            }}
+                        >
                             Created By
                         </Label>
                         <AdvancedSelect
@@ -147,7 +164,13 @@ export default class DocumentSearchForm extends React.PureComponent<Props, any> 
                         />
                     </Col>
                     <Col className="p-0 pl-2 m-0 mb-3">
-                        <Label className="sharepoint-widget__label mt-4">
+                        <Label
+                            className="mt-4"
+                            style={{
+                                fontSize: "16px",
+                                fontWeight: "500"
+                            }}
+                        >
                             Document Tags
                         </Label>
                         <AdvancedSelect
@@ -163,20 +186,6 @@ export default class DocumentSearchForm extends React.PureComponent<Props, any> 
                         />
                     </Col>
                 </Row>
-                {/* <div className="d-flex flex-wrap mt-2 mb-3">
-                    {this.state.documentFilters.tags ?
-                        this.state.documentFilters.tags.map((t) =>
-                            <div className="sharepoint-widget__badge">
-                                {t.value}
-                                <CloseOutlined
-                                    className="ml-2 p-0 sharepoint-widget__badge__close-link"
-                                    size={11}
-                                    onClick={() => this.deselectTag(t)}
-                                />
-                            </div>
-                        )
-                    : null}
-                </div> */}
             </form>
         )
     }
