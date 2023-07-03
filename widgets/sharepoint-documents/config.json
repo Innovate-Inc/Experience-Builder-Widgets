@@ -1,10 +1,11 @@
 {
-    "clientId": "",
-    "tenantId": "",
-    "siteId": "",
-    "listId": "",
-    "driveId": "",
-    "driveItemRootId": "",
-    "relationshipListId": "",
-    "permissionsListId": ""
+    "sharePointSettings": {
+        "clientId": "939d9676-fe38-4858-8d21-9a020f780119",
+        "tenantId": "aea766d3-9849-46f5-abab-9ed726bb2ae9",
+        "siteId": "jamestowntribeorg.sharepoint.com,9211d5cb-4c27-425a-97d8-1429e9620d21,ab5b206b-de19-4a4d-95fc-a69169a2ac80",
+        "listId": "5172c841-ea45-451d-82b6-012efd4afcbd",
+        "driveId": "b!y9URkidMWkKX2BQp6WINIWsgW6sZ3k1KlfymkWmirIBByHJRReodRYK2AS79Svy9",
+        "driveItemRootId": "01AS3BQXF6Y2GOVW7725BZO354PWSELRRZ",
+        "permissionsListId": "08118b69-f13b-44e0-8281-2e23f8f805e0"
+    }
 }

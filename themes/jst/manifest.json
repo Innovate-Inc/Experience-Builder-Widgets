@@ -1,0 +1,14 @@
+{
+    "name": "jst",
+    "label": "Jamestown S'Klallam Tribe Theme",
+    "version": "1.0.0",
+    "exbVersion": "1.10.0",
+    "author": "Innovate, Inc.!",
+    "description": "Styling for Jamestown S'Klallam apps",
+    "copyright": "",
+    "license": "http://www.apache.org/licenses/LICENSE-2.0",
+    "styleFiles": {
+        "css": true,
+        "js": false
+      }
+    }
