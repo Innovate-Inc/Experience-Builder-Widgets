@@ -1,25 +1,14 @@
 {
   "name": "sharepoint-documents",
   "label": "Documents",
-  "dependency": "jimu-arcgis",
   "type": "widget",
-  "version": "1.0.0",
-  "exbVersion": "1.8.0",
+  "version": "2.0.0",
+  "exbVersion": "1.10.0",
   "author": "Innovate, Inc.!",
   "description": "This is used to interface with Sharepoint resources.",
   "copyright": "",
   "license": "http://www.apache.org/licenses/LICENSE-2.0",
-  "messageActions": [
-    {
-      "name": "document_search",
-      "label": "Document Search",
-      "uri": "actions/query-action",
-      "settingUri": "actions/query-action-setting"
-    }
-  ],
-  "properties": {
-    "hasConfig": true
-  },
+  "properties": {},
   "translatedLocales": [
     "en"
   ]

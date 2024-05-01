@@ -43,5 +43,6 @@
         "num-ratings": "desc",
         "num-views": "desc"
     },
-    "selectedScopes": []
+    "selectedScopes": [],
+    "defaultScope": ""
 }

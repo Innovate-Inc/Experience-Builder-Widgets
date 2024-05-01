@@ -1,0 +1,48 @@
+::-webkit-scrollbar-thumb {
+    background-color: var(--info-700)
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+.sharepoint-widget__label {
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.sharepoint-widget__text-area textarea {
+    resize: none;
+}
+
+.sharepoint-widget__badge__close-link {
+    cursor: pointer;
+}
+
+.sharepoint-widget__badge {
+    border-radius: 10px;
+    margin: 5px 5px 5px 0px;
+    padding: 5px 10px;
+    background: var(--secondary-300);
+    color: var(--white);
+}
+
+.sharepoint-widget__descriptive-text {
+    font-size: 14px;
+}
+
+.dropdown-button {
+    border: var(--light-900) 1px solid;
+}
+
+.sharepoint-widget__loading-container {
+    height: 50px;
+    position: relative;
+    width: 100%;
+}
+
+.feature-selection-container {
+    max-height: 200px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}

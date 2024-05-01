@@ -1,10 +1,11 @@
 {
-    "clientId": "",
-    "tenantId": "",
-    "siteId": "",
-    "listId": "",
-    "driveId": "",
-    "driveItemRootId": "",
-    "relationshipListId": "",
-    "permissionsListId": ""
+    "sharePointSettings": {
+        "clientId": "",
+        "tenantId": "",
+        "siteId": "",
+        "listId": "",
+        "driveId": "",
+        "driveItemRootId": "",
+        "permissionsListId": ""
+    }
 }
