@@ -3,7 +3,7 @@
 
 import { React, jsx, getAppStore, IMState } from "jimu-core";
 import { AllWidgetSettingProps } from "jimu-for-builder";
-import { JimuMapViewSelector } from "jimu-ui/advanced/setting-components";
+import { MapWidgetSelector } from 'jimu-ui/advanced/setting-components'
 import { MultiSelect, Input } from "jimu-ui";
 
 export default class Setting extends React.PureComponent<AllWidgetSettingProps<any>, any> {
@@ -15,11 +15,12 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
     // };
     
     render() {
+        console.log(this.props)
 
         return <div className="add-data-setting">
             <div className="m-4">
                 <label>Select the map to be used with this widget:</label>
-                <JimuMapViewSelector
+                <MapWidgetSelector
                     useMapWidgetIds={this.props.useMapWidgetIds}
                     onSelect={useMapWidgetIds => {
                         this.props.onSettingChange({
