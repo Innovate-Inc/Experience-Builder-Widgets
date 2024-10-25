@@ -1,6 +1,6 @@
 /** @jsx jsx */
 
-import { React, jsx } from 'jimu-core';
+import { DataSourceManager, React, jsx } from 'jimu-core';
 import { Card, CardBody, CardHeader, Button, Tooltip, Loading } from 'jimu-ui';
 import { MinusCircleOutlined } from 'jimu-icons/outlined/editor/minus-circle'
 import { AddPageOutlined } from 'jimu-icons/outlined/editor/add-page'
@@ -22,6 +22,7 @@ interface Props {
     setInfoModalDocument: any
     setDeletingDocument: any
     permissions: any
+    dataSourceManager: DataSourceManager
 }
 
 export default class FeatureCard extends React.PureComponent<Props, any> {
@@ -65,6 +66,12 @@ export default class FeatureCard extends React.PureComponent<Props, any> {
 		}
 	}
 
+    
+    getLayerName(ds) {
+        const dataSource = this.props.dataSourceManager.getDataSource(ds.dataSourceId)
+        return dataSource.getLabel()
+    }
+
     getFieldAlias(r, f) {
 		const fieldAlias = r.feature.layer.fields.find((field) => field.name === f).alias
 		return fieldAlias
@@ -72,7 +79,7 @@ export default class FeatureCard extends React.PureComponent<Props, any> {
 
     render() {
         const id = this.props.useDataSource.dataSourceId
-        const ds = this.props.useDataSource.dataSource
+        const ds = this.props.useDataSource
         const r = this.props.record
         const selectedFeatures = {}
         selectedFeatures[id] = [r]
@@ -126,7 +133,7 @@ export default class FeatureCard extends React.PureComponent<Props, any> {
                         </div> : null
                     ) : null}
                     <div>
-                        Data Source: {ds.layerDefinition.name}
+                        Data Source: {this.getLayerName(ds)}
                     </div>
                 </CardHeader>
                 <CardBody className={`${this.props.documents.length > 0 ? "py-0" : "py-3"}`}>
@@ -148,6 +155,7 @@ export default class FeatureCard extends React.PureComponent<Props, any> {
                                 setDeletingDocument={doc => this.props.setDeletingDocument(doc)}
                                 useDataSources={null}
                                 permissions={this.props.permissions}
+                                dataSourceManager={this.props.dataSourceManager}
                             />
                         : "No documents attached to this feature"
                     }

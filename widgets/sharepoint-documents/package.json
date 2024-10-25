@@ -1,8 +1,8 @@
 {
   "dependencies": {
-    "react-virtual": "^2.10.4",
-    "@azure/msal-browser": "^2.25.0",
-    "@microsoft/microsoft-graph-client": "^3.0.2",
-    "react-query": "^3.39.0"
+    "@azure/msal-browser": "^2.38.4",
+    "@microsoft/microsoft-graph-client": "^3.0.7",
+    "react-query": "^3.39.3",
+    "react-virtual": "^2.10.4"
   }
 }

@@ -37,14 +37,13 @@ export default async function initMsal(props) {
         delete: false
     }
     await graphClient.api(permissionsUrl).get().then((results) => {
-        // field names for Jamestown Sharepoint site. Innovate site uses First and Title
-        let user = results.value.find((v) => v.fields.Title === account.name)
-        switch (user.fields.PermissionGroup) {
-            case "Site Owners":
+        let user = results.value.find((v) => v.fields.UserID === account.localAccountId)
+        switch (user.fields.Role) {
+            case "owner":
                 permissions.delete = true
-            case "Site Member":
+            case "user":
                 permissions.write = true
-            case "Site Visitor":
+            case "visitor":
                 permissions.read = true
                 break
         }

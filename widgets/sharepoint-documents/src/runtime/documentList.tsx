@@ -1,6 +1,6 @@
 /** @jsx jsx */
 
-import { React, jsx } from 'jimu-core';
+import { DataSourceManager, React, jsx } from 'jimu-core';
 import { Container, Row, Button, Tooltip } from 'jimu-ui';
 import { LaunchOutlined } from 'jimu-icons/outlined/editor/launch'
 import { TrashOutlined } from 'jimu-icons/outlined/editor/trash'
@@ -13,6 +13,7 @@ interface Props {
     setDeletingDocument: any
     useDataSources: any
     permissions: any
+    dataSourceManager: DataSourceManager
 }
 
 export default class DocumentList extends React.PureComponent<Props, any> {
@@ -44,12 +45,19 @@ export default class DocumentList extends React.PureComponent<Props, any> {
 
     countAllRelatedFKs(docFKs) {
         let totalRelatedFKs = 0
-        if (this.props.useDataSources) {
-            this.props.useDataSources.forEach(ds => {
+        const sources = this.props.useDataSources
+        if (sources) {
+            for (let i=0; i<sources.length; i++) {
+                let ds = sources[i]
                 totalRelatedFKs += this.compareFKs(ds.relatedFeatures, docFKs)
-            })
+            }
         }
         return totalRelatedFKs > 0
+    }
+
+    getLayerName(ds) {
+        const dataSource = this.props.dataSourceManager.getDataSource(ds.dataSourceId)
+        return dataSource.getLabel()
     }
 
     render() {
@@ -139,7 +147,7 @@ export default class DocumentList extends React.PureComponent<Props, any> {
                             {this.props.useDataSources ? <span className="font-weight-bold">{this.countAllRelatedFKs(d.fields.FeatureFKs) ? "Related: " : "No related features"}</span> : null}
                             {this.props.useDataSources && this.countAllRelatedFKs(d.fields.FeatureFKs) ? this.props.useDataSources.filter(ds => this.compareFKs(ds.relatedFeatures, d.fields.FeatureFKs) > 0).map(ds => {
                                 const fkMatchCount = this.compareFKs(ds.relatedFeatures, d.fields.FeatureFKs)
-                                return <span>{ds.dataSource.layerDefinition.name} ({fkMatchCount} feature{fkMatchCount > 1 ? "s" : null})</span>
+                                return <span>{this.getLayerName(ds)} ({fkMatchCount} feature{fkMatchCount > 1 ? "s" : null})</span>
                             }).reduce((a, b) => [a, ", ", b]) : null}
                         </div>
                     </Row>

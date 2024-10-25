@@ -37,12 +37,19 @@ export default class UploadModal extends React.PureComponent<Props, any> {
     }
 
     getFeatureFks() {
-        let featureFks = []
+        const featureFks: string[] = []
         const selectedFeatureKeys = Object.keys(this.props.selectedFeatures)
-        selectedFeatureKeys.forEach(k => {
+        for (let i=0; i<selectedFeatureKeys.length; i++) {
+            let k = selectedFeatureKeys[i]
             const features = this.props.selectedFeatures[k]
-            featureFks = featureFks.concat(features.map(f => f.getFieldValue("GlobalID").replace("{", "").replace("}", "")))
-        })
+            for (let j = 0; j < features.length; j++) {
+                const f = features[j];
+                const globalId = f.getFieldValue("GlobalID");
+                if (globalId) {
+                  featureFks.push(globalId.replace("{", "").replace("}", ""))
+                }
+            }
+        }
         return featureFks
     }
 
@@ -71,7 +78,7 @@ export default class UploadModal extends React.PureComponent<Props, any> {
         this.setState({ uploadInProgress: true })
         const file = this.state.file
         const url = `${this.props.driveItemRootUrl}/${this.props.driveItemRootId}:/${uuidv4()}/${file.name}:/content`
-        let featureFks = []
+        let featureFks: string[] = []
         if (this.props.selectedFeatures && Object.keys(this.props.selectedFeatures).length > 0) {
             featureFks = this.getFeatureFks()
         }

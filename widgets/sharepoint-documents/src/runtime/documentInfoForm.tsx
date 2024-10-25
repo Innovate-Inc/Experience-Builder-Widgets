@@ -50,7 +50,11 @@ export default class DocumentInfoForm extends React.PureComponent<Props, any> {
                         onAcceptValue={function noRefCheck() { }}
                         type="file"
                         required
-                        onChange={e => this.props.updateDocumentInfo({file: e.target.files[0]})}
+                        onChange={e => {
+                            if (e.target.files) {
+                                this.props.updateDocumentInfo({file: e.target.files[0]})
+                            }
+                        }}
                     />
                 : null}
                 <Label

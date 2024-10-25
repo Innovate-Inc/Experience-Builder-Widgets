@@ -1,6 +1,6 @@
 /** @jsx jsx */
 
-import { React, jsx } from 'jimu-core';
+import { DataSourceManager, React, jsx } from 'jimu-core';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Tooltip, Button, Loading, Row, Label, Checkbox, Tabs, Tab } from 'jimu-ui';
 
 interface Props {
@@ -12,6 +12,7 @@ interface Props {
     queryDocuments: any
     listUrl: any
     setInfoModalDocument: any
+    dataSourceManager: DataSourceManager
 }
 
 export default class EditRelationshipsModal extends React.PureComponent<Props, any> {
@@ -104,16 +105,23 @@ export default class EditRelationshipsModal extends React.PureComponent<Props, a
 
     componentDidMount() {
         const docFks = this.props.doc.fields.FeatureFKs
+        const sources = this.props.useDataSources
         let relatedFeatures = []
-        if (docFks) {
-            this.props.useDataSources.forEach(ds => {
+        if (docFks && sources) {
+            for (let i=0; i<sources.length; i++) {
+                let ds = sources[i]
                 let dsFeatures = ds.relatedFeatures.map(f => f.attributes.GlobalID.replace("{", "").replace("}", ""))
                 relatedFeatures = relatedFeatures.concat(dsFeatures.filter(f => docFks.includes(f)))
-            })
+            }
         }
         this.setState({
             inputFeatures: relatedFeatures
         })
+    }
+
+    getLayerName(ds) {
+        const dataSource = this.props.dataSourceManager.getDataSource(ds.dataSourceId)
+        return dataSource.getLabel()
     }
 
     render() {
@@ -160,7 +168,7 @@ export default class EditRelationshipsModal extends React.PureComponent<Props, a
                                                 fontSize: "14px"
                                             }}
                                         >
-                                            <div className="font-weight-bold pb-2">{ds.dataSource.layerDefinition.name}</div>
+                                            <div className="font-weight-bold pb-2">{this.getLayerName(ds)}</div>
                                             <div>
                                                 {this.getRelatedFeatures(ds).map(f => 
                                                     <Label
@@ -202,7 +210,7 @@ export default class EditRelationshipsModal extends React.PureComponent<Props, a
                                                 fontSize: "14px"
                                             }}
                                         >
-                                            <div className="font-weight-bold pb-2">{ds.dataSource.layerDefinition.name}</div>
+                                            <div className="font-weight-bold pb-2">{this.getLayerName(ds)}</div>
                                             <div>
                                                 {this.props.selectedFeatures[ds.dataSourceId].map(f => 
                                                     <Label
