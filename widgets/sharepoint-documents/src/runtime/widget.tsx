@@ -11,6 +11,7 @@ import DocumentSearchForm from './documentSearchForm'
 import DocumentList from './documentList'
 import EditRelationshipModal from './editRelationshipsModal'
 import { Client } from '@microsoft/microsoft-graph-client'
+import { SqlQueryParams } from 'jimu-core'
 
 interface UseDataSourceModified extends UseDataSource {
   dataSource: DataSource
@@ -44,7 +45,7 @@ interface SharepointFilters {
   startDate: string | null
   endDate: string | null
   searchText: string | null
-  creators: SharepointCreator[]
+  creators: string[]
 }
 
 export default class Widget extends React.PureComponent<AllWidgetProps<any>, any> {
@@ -77,7 +78,10 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
         creators: []
       },
       useDataSources: [],
-      validSettings: false
+      validSettings: false,
+      query: {
+        outFields: ['*']
+      }
     }
   };
 
@@ -92,7 +96,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
     return dataSource
   }
 
-  getSelectedFeatures (ds: UseDataSourceModified) {
+  getSelectedFeatures (ds) {
     if (ds) {
       const dataSource = this.getDataSource(ds)
       if (dataSource && dataSource.getSelectedRecords()) {
@@ -184,28 +188,33 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
   getFilteredDocuments() {
     const documentFilters: SharepointFilters = this.state.documentFilters
     const documents: SharepointDocument[] = this.state.documents
-    let tagMatch = true
-    let creatorMatch = true
-    let startMatch = true
-    let endMatch = true
-    let searchMatch = true
+    
     const filteredDocuments: SharepointDocument[] = documents.filter((d: SharepointDocument) => {
+      let tagMatch = true
+      let creatorMatch = true
+      let startMatch = true
+      let endMatch = true
+      let searchMatch = true
       if (documentFilters) {
         // If the document does not include any selected tags, return false
-        if (documentFilters.tags.length > 0) {
+        if (documentFilters.tags && documentFilters.tags.length > 0) {
           tagMatch = false
-          for (let i = 0; i < d.fields.Tags.length; i++) {
-            const t = d.fields.Tags[i]
-            if (documentFilters.tags.includes(t)) {
-              tagMatch = true
+          if (d.fields && d.fields.Tags) {
+            for (let i = 0; i < d.fields.Tags.length; i++) {
+              const t = d.fields.Tags[i]
+              if (documentFilters.tags.includes(t)) {
+                tagMatch = true
+              }
             }
           }
         }
         // If the document does not include any selected creators, return false
-        if (documentFilters.creators.length > 0) {
+        if (documentFilters.creators && documentFilters.creators.length > 0 && d.createdBy && d.createdBy.user && d.createdBy.user.displayName) {
           const creators = documentFilters.creators
-          if (!creators.includes(d.createdBy.user)) {
+          if (!creators.includes(d.createdBy.user.displayName)) {
             creatorMatch = false
+          } else {
+            creatorMatch = true
           }
         }
         const docDate = new Date(d.createdDateTime)
@@ -272,14 +281,8 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
         graphClient.api(`${this.state.listUrl}/columns/${tagColumn.id}`)
           .header("Prefer", "HonorNonIndexedQueriesWarningMayFailRandomly")
           .get().then(r => {
-            const documentTags = r.choice.choices.map(t => {
-              return {
-                label: t,
-                value: t
-              }
-            })
             this.setState({
-              documentTags: documentTags
+              documentTags: r.choice.choices
             })
 
           });
@@ -295,7 +298,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
             infoModalDocument: newDoc
           })
         }
-        const creatorList = Array.from(new Set(documents.map((d: SharepointDocument) => d.createdBy.user)))
+        const creatorList = Array.from(new Set(documents.map((d: SharepointDocument) => d.createdBy.user.displayName)))
 
         let dsm
         if (this.state.dataSourceManager) {
@@ -370,6 +373,8 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
         const globalId = f.getFieldValue("GlobalID");
         if (globalId) {
           featureFks.push(globalId.replace("{", "").replace("}", ""))
+        } else {
+          const objectId = f.getFieldValue
         }
       }
     }
@@ -512,7 +517,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
                                 graphClient={this.state.graphClient}
                                 driveItemRootUrl={this.state.driveItemRootUrl}
                                 driveItemRootId={this.props.config.sharePointSettings.driveItemRootId}
-                                queryDocuments={(eTag) => this.queryDocuments(eTag=eTag)}
+                                queryDocuments={(eTag) => this.queryDocuments(null, eTag)}
                                 setInfoModalDocument={doc => this.setState({ infoModalDocument: doc })}
                                 setDeletingDocument={doc => this.setState({ deletingDocument: doc })}
                                 permissions={this.state.permissions}
@@ -524,7 +529,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
                 </Container>
               </Row>
               {dataSourcesConfigured ? this.state.useDataSources.map((ds) =>
-                <DataSourceComponent useDataSource={ds} widgetId={this.props.id} onSelectionChange={() => this.getSelectedFeatures(ds)} />
+                <DataSourceComponent useDataSource={ds} widgetId={this.props.id} query={this.state.query} onSelectionChange={() => this.getSelectedFeatures(ds)} />
               ) : null}
             </Container>
             :
@@ -549,7 +554,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
             graphClient={this.state.graphClient}
             driveItemRootUrl={this.state.driveItemRootUrl}
             driveItemRootId={this.props.config.sharePointSettings.driveItemRootId}
-            queryDocuments={(eTag) => this.queryDocuments(eTag=eTag)}
+            queryDocuments={(eTag) => this.queryDocuments(null, eTag)}
           /> : null
         }
         {this.state.infoModalDocument ?

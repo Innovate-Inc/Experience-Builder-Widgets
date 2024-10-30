@@ -18,14 +18,18 @@ export default class DocumentSearchForm extends React.PureComponent<Props, any> 
         super(props)
         this.state = {
             selectedTags: [],
-            documentFilters: {}
+            documentFilters: {},
+            creatorList: [],
+            documentTags: []
         };
     };
 
     static getDerivedStateFromProps(props, state) {
         
         return {
-            documentFilters: props.documentFilters
+            documentFilters: props.documentFilters,
+            creatorList: props.creatorList,
+            documentTags: props.documentTags
         }
     }
 
@@ -77,6 +81,34 @@ export default class DocumentSearchForm extends React.PureComponent<Props, any> 
     }
 
     render() {
+        const creators = this.state.creatorList ? this.state.creatorList.map((c) => {
+            return {
+                label: c,
+                value: c
+            }
+        }) : []
+
+        const filteredCreators = this.state.documentFilters ? this.state.documentFilters.creators.map((c) => {
+            return {
+                label: c,
+                value: c
+            }
+        }) : []
+
+        const tags = this.state.documentTags ? this.state.documentTags.map((t) => {
+            return {
+                label: t,
+                value: t
+            }
+        }) : []
+
+        const filteredTags = this.state.documentFilters ? this.state.documentFilters.tags.map((t) => {
+            return {
+                label: t,
+                value: t
+            }
+        }) : []
+
         return (
             <form className="pt-3">
                 <TextInput
@@ -152,11 +184,14 @@ export default class DocumentSearchForm extends React.PureComponent<Props, any> 
                             Created By
                         </Label>
                         <AdvancedSelect
-                            staticValues={this.props.creatorList}
-                            selectedValues={this.state.documentFilters.creators}
+                            staticValues={creators}
+                            selectedValues={filteredCreators}
                             onChange={e => {
-                                let filters = {...this.state.documentFilters}
-                                filters.creators = e
+                                let newCreators = []
+                                if (e !== null) {
+                                    newCreators = e.map(c => c.label)
+                                }
+                                const filters = {...this.state.documentFilters, creators: newCreators}
                                 this.props.updateDocumentFilters(filters)
                             }}
                             isMultiple
@@ -174,11 +209,14 @@ export default class DocumentSearchForm extends React.PureComponent<Props, any> 
                             Document Tags
                         </Label>
                         <AdvancedSelect
-                            staticValues={this.props.documentTags}
-                            selectedValues={this.state.documentFilters.tags}
+                            staticValues={tags}
+                            selectedValues={filteredTags}
                             onChange={e => {
-                                let filters = {...this.state.documentFilters}
-                                filters.tags = e
+                                let newTags = []
+                                if (e !== null) {
+                                    newTags = e.map(t => t.label)
+                                }
+                                const filters = {...this.state.documentFilters, tags: newTags}
                                 this.props.updateDocumentFilters(filters)
                             }}
                             isMultiple

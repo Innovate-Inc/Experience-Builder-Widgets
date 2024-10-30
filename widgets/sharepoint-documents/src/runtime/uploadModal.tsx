@@ -25,7 +25,8 @@ export default class UploadModal extends React.PureComponent<Props, any> {
             documentTitle: null,
             documentDescription: null,
             selectedTags: null,
-            uploadInProgress: false
+            uploadInProgress: false,
+            validFileName: true
         };
     };
 
@@ -100,7 +101,7 @@ export default class UploadModal extends React.PureComponent<Props, any> {
 
         if (this.state.selectedTags) {
             fields["Tags@odata.type"] = "Collection(Edm.String)"
-            fields["Tags"] = this.state.selectedTags.map(t => t.value)
+            fields["Tags"] = this.state.selectedTags
         }
         await client.api(`${this.props.driveItemRootUrl}/${driveItem.id}/listitem/fields`)
             .update(fields)
@@ -115,6 +116,14 @@ export default class UploadModal extends React.PureComponent<Props, any> {
         const file = this.state.file
         const title = this.state.documentTitle
         const desc = this.state.documentDescription
+        const invalidChars = /[#%&]/
+        if (file && invalidChars.test(file.name)) {
+            this.setState({validFileName: false})
+            return true
+        } else {
+            this.setState({validFileName: true})
+        }
+        
         if (file && title && title !== "" && desc && desc !== "") {
             return false
         } else {
@@ -159,6 +168,7 @@ export default class UploadModal extends React.PureComponent<Props, any> {
                             documentTitle={null}
                             documentDescription={null}
                             upload={true}
+                            validFileName={this.state.validFileName}
                         />
                     }
                     <div

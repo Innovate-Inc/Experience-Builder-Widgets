@@ -11,6 +11,7 @@ interface Props {
     documentTitle: any
     documentDescription: any
     upload: any
+    validFileName: any
 }
 
 export default class DocumentInfoForm extends React.PureComponent<Props, any> {
@@ -43,19 +44,47 @@ export default class DocumentInfoForm extends React.PureComponent<Props, any> {
     }
 
     render() {
+
+        const tags = this.props.documentTags ? this.props.documentTags.map((t) => {
+            return {
+                label: t,
+                value: t
+            }
+        }) : []
+
+        let selectedTags = [];
+        if (this.state.selectedTags) {
+            selectedTags = this.state.selectedTags.map((t) => {
+                return {
+                    label: t,
+                    value: t
+                }
+            })
+        }
+
         return (
             <form>
                 {this.props.upload ?
-                    <TextInput className="mb-4"
-                        onAcceptValue={function noRefCheck() { }}
-                        type="file"
-                        required
-                        onChange={e => {
-                            if (e.target.files) {
-                                this.props.updateDocumentInfo({file: e.target.files[0]})
-                            }
-                        }}
-                    />
+                    <div className=" mb-4">
+                        <TextInput
+                            onAcceptValue={function noRefCheck() { }}
+                            type="file"
+                            required
+                            onChange={e => {
+                                if (e.target.files) {
+                                    this.props.updateDocumentInfo({file: e.target.files[0]})
+                                }
+                            }}
+                        />
+                        {!this.props.validFileName ?
+                            <Row
+                                className="mx-0 mt-1 mb-4"
+                                style={{color: "#D0544E"}}
+                            >
+                                The file name must not include any of the following characters: %, #, or &
+                            </Row>
+                        : null}
+                    </div>
                 : null}
                 <Label
                     className="mt-0"
@@ -109,11 +138,15 @@ export default class DocumentInfoForm extends React.PureComponent<Props, any> {
                     Tags
                 </Label>
                 <AdvancedSelect
-                    staticValues={this.props.documentTags}
-                    selectedValues={this.state.selectedTags}
+                    staticValues={tags}
+                    selectedValues={selectedTags}
                     onChange={e => {
-                        this.props.updateDocumentInfo({ selectedTags: e })
-                        this.setState({selectedTags: e})
+                        let newTags = []
+                        if (e !== null) {
+                            newTags = e.map(t => t.label)
+                        }
+                        this.props.updateDocumentInfo({ selectedTags: newTags })
+                        this.setState({selectedTags: newTags})
                     }}
                     isMultiple
                     hideBottomTools
@@ -130,7 +163,7 @@ export default class DocumentInfoForm extends React.PureComponent<Props, any> {
                                     color: "#FFFFFD"
                                 }}
                             >
-                                {t.value}
+                                {t}
                                 <CloseOutlined
                                     className="ml-2 p-0"
                                     size={11}

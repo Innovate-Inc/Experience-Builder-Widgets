@@ -7,15 +7,15 @@ import { SettingCollapse, SettingSection, SettingRow } from 'jimu-ui/advanced/se
 
 interface WidgetState {
     selectedDataSource: any
-    expressionBuilderPopupOpen: boolean
-    useDataSources: ImmutableArray<UseDataSource> | undefined
-    dataSourceExpressions: Array<Expression> | undefined
-    dataSourceManager: DataSourceManager | undefined
-    invalidSource: boolean
+    expressionBuilderPopupOpen: any
+    useDataSources: any
+    dataSourceExpressions: any
+    dataSourceManager: any
+    invalidSource: any
 }
 
 export default class Setting extends React.PureComponent<AllWidgetSettingProps<any>, any> {
-    state: WidgetState = {
+    state = {
         selectedDataSource: undefined,
         expressionBuilderPopupOpen: false,
         useDataSources: undefined,
@@ -184,7 +184,7 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
                                         expressionBuilderPopupOpen: true
                                     })}
                                 >
-                                    {ds.expression ? this.getDataSourceExpression(ds).name : "Set attribute or expression"}
+                                    {ds ? ds.expression ? this.getDataSourceExpression(ds).name : "Set attribute or expression" : "Select a data source"}
                                 </Button>
                             </SettingRow>
                         </DataSourceComponent>
@@ -195,7 +195,7 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
                         isOpen={this.state.expressionBuilderPopupOpen}
                         onClose={() => this.setState({ expressionBuilderPopupOpen: false })}
                         onChange={this.updateDataSourceExpression}
-                        expression={this.getDataSourceExpression()}
+                        expression={this.state.selectedDataSource ? this.getDataSourceExpression(this.state.selectedDataSource): null}
                     />
 
                 </SettingCollapse>
@@ -212,7 +212,7 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
                             </SettingRow>
                             <SettingRow className="mt-1 p-0">
                                 <FieldSelector
-                                    useDataSources={Immutable([ds as unknown as UseDataSource])}
+                                    useDataSources={Immutable([ds])}
                                     useDropdown
                                     isMultiple
                                     selectedFields={ds.fields || Immutable([])}

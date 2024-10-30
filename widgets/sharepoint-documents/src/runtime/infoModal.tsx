@@ -57,7 +57,7 @@ export default class InfoModal extends React.PureComponent<Props, any> {
         };
         if (this.state.selectedTags) {
             fields["Tags@odata.type"] = "Collection(Edm.String)"
-            fields["Tags"] = this.state.selectedTags.map(t => t.value)
+            fields["Tags"] = this.state.selectedTags
         }
 
         const newFields = await client.api(`${this.props.listUrl}/items/${this.props.doc.id}/fields`)
@@ -74,12 +74,10 @@ export default class InfoModal extends React.PureComponent<Props, any> {
         const doc = this.props.doc
         const title = doc.fields.Title
         const description = doc.fields.DocumentDescription
-        const tags = doc.fields.Tags ? doc.fields.Tags.map(t => {
-            return {
-                "label": t,
-                "value": t
-            }
-        }) : []
+        let tags = []
+        if (doc.fields.Tags && doc.fields.Tags.length > 0) {
+            tags = doc.fields.Tags
+        }
         this.setState({
             documentTitle: title,
             documentDescription: description,
@@ -166,6 +164,7 @@ export default class InfoModal extends React.PureComponent<Props, any> {
                             documentTitle={this.state.documentTitle}
                             documentDescription={this.state.documentDescription}
                             selectedTags={this.state.selectedTags}
+                            validFileName={true}
                             upload={false}
                         />
                         :
